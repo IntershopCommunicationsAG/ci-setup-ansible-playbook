@@ -1,0 +1,33 @@
+---
+- name: create jenkins repo
+  yum_repository: name=jenkins description="Jenkins CI" baseurl=http://pkg.jenkins.io/redhat-stable gpgcheck=true gpgkey=http://pkg.jenkins.io/redhat/jenkins.io.key
+
+- name: install jenkins
+  yum: name=jenkins state=present
+
+- name: enable jenkins
+  service: name=jenkins enabled=true state=started
+
+- name: open firewall jenkins
+  firewalld: port=8080/tcp permanent=true state=enabled immediate=yes
+  
+- name: get initial password
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  register: initialPwd
+  
+- name: set initial password
+  set_fact: 
+    initialAdminPassword: "{{initialPwd.stdout}}"
+    
+- name: get crumb
+  uri: user=admin password={{initialAdminPassword}} url=http://localhost:8080/crumbIssuer/api/json force_basic_auth=true
+  register: crumb
+ 
+- set_fact:
+    crumb: "{{crumb.json.crumbRequestField}}:{{crumb.json.crumb}}"
+
+- name: disable setup wizard
+  uri: user=admin password={{initialAdminPassword}} url=http://localhost:8080/setupWizard/completeInstall force_basic_auth=true
+  register: crumb
+    
+ 

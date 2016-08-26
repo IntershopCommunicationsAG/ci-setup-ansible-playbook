@@ -1,0 +1,37 @@
+---
+ish_user: intershop
+ish_group: "{{ish_user}}"
+ish_groups: dba
+ish_home: /opt/intershop
+ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intershop/build/infrastructure/intershop-ci-setup-bootstrap/3.3.0/intershop-ci-setup-bootstrap-3.3.0.zip"
+ish_bootstrap_directory: intershop-ci-setup-bootstrap
+ish_setupDirectory: '{{ish_home}}/ci-source'
+ish_hostName: '{{ansible_hostname}}'
+ish_repoBaseURL: 'http://{{ansible_fqdn}}:8081/nexus/content'
+ish_assemblyName: 'assembly'
+ish_componentSetName: 'componentSet'
+#ish_corporateName:
+#ish_projectName:
+#ish_license: |
+ish_vcs: git
+#ish_svn_baseurl: 'https://svn.intershop.de/ics/webasto/Source'
+ish_repos:
+  - { src: '{{ish_home}}/{{ish_bootstrap_directory}}', repo: '{{ish_svn_baseurl}}/devops/{{ish_bootstrap_directory}}' }
+  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-distribution', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-distribution' }
+  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-plugins', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-plugins' }
+  - { src: '{{ish_setupDirectory}}/projects/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/projects/{{ish_projectName}}' }
+  - { src: '{{ish_setupDirectory}}/projects/oracleDriver', repo: '{{ish_svn_baseurl}}/projects/oracleDriver/p_oracle' }
+  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}' }
+  - { src: '{{ish_setupDirectory}}/devops/ci_server/user_home', repo: '{{ish_svn_baseurl}}/devops/ci_server/user_home' }
+  - { src: '{{ish_setupDirectory}}/devops/ci_server/host_configs', repo: '{{ish_svn_baseurl}}/devops/ci_server/host_configs' }
+ish_content_changes:
+  - {dest: "{{ish_componentSetName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
+  - {dest: "{{ish_componentSetName}}/.project", regexp: "(<projectDescription>\\v*\\s*<name>).*(</name>)", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
+  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
+  - {dest: "{{ish_componentSetName}}/gradle.properties", regexp: "(\\s*version\\s*=\\s*).*", replace: "\\g<1>{{ish_version}}" }
+  - {dest: "{{ish_assemblyName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_assemblyName}}\\g<2>" }
+  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(Cartridges.collect \\{\").*({{':'}}\\$it\"\\})", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
+  - {dest: "{{ish_assemblyName}}/gradle.properties", regexp: "(# componentsets with the same live cycle\\v*\\s*filter).*$", replace: "\\g<1>.{{ish_corporateName}}.{{ish_componentSetName}} = {{ish_version}}%suffix%" }

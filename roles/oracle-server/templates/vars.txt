@@ -1,0 +1,7 @@
+ORACLE_HOSTNAME={{ansible_hostname}}
+UNIX_GROUP_NAME={{oracle_group}}
+INVENTORY_LOCATION={{oracle_inventory_dir}}
+ORACLE_HOME={{oracle_server_home}}
+ORACLE_BASE={{oracle_base}}
+oracle.install.db.config.starterdb.globalDBName={{ansible_fqdn}}
+oracle.install.db.config.starterdb.password.ALL={{oracle_password}}

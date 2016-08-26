@@ -1,0 +1,11 @@
+---
+- name: check current jdk_download_url|basename}}
+  shell: java -version 2>&1 | grep {{jdk_version}}
+  register: jdkcheck
+  ignore_errors: true
+  changed_when: "{{jdkcheck.rc}} != 0"
+  failed_when: false
+  
+- name: do jdk installation
+  include: jdk.yml
+  when: "{{jdkcheck.changed}}"

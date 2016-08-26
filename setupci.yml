@@ -1,0 +1,10 @@
+---
+- hosts: vms
+  roles:
+    - common
+    - oraclejdk
+    - nexus
+    - oracle-client
+    - oracle-server
+    - cisetup
+    - jenkins

@@ -1,0 +1,4 @@
+---
+- hosts: localhost
+  roles:
+    - create_vsphere_vm

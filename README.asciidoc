@@ -1,0 +1,133 @@
+= Ansible role ishsetup
+:latestRevision: 1.0.0
+:toc:
+
+== Summary
+This ansible role setup the ci environment
+
+Preconditions:
+
+* nexus installed and configured
+* oracle jdk installed
+* oracle client installed
+
+== Configuration
+Default values are defined in `defaults/main.yml`. Commented values must be configured in Ansible.
+```
+---
+# User for ci setup
+ish_user: intershop
+
+# Group for ish_user
+ish_group: "{{ish_user}}"
+
+# additional groups
+ish_groups: dba
+
+# home directory for ish_user
+ish_home: /opt/intershop
+
+# Url for bootstrap archive
+ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intershop/build/infrastructure/intershop-ci-setup-bootstrap/3.3.0/intershop-ci-setup-bootstrap-3.3.0.zip"
+
+# Directory where to expand the bootstrap (relative to ish_home)
+ish_bootstrap_directory: intershop-ci-setup-bootstrap
+
+# setupDirectory for ci-configuration
+ish_setupDirectory: '{{ish_home}}/ci-source'
+
+# hostname for ci-configuration
+ish_hostName: '{{ansible_hostname}}'
+
+# repoBaseURL for ci-configuration
+ish_repoBaseURL: 'http://{{ansible_fqdn}}:8081/nexus/content'
+
+# assemblyName for ci-configuration
+ish_assemblyName: 'assembly'
+
+# componentSetName for ci-configuration
+ish_componentSetName: 'componentSet'
+
+# corporateName for ci-configuration
+#ish_corporateName:
+
+# projectName for ci-configuration
+#ish_projectName:
+
+# license for ci-configuration
+# put content of license.xml
+#ish_license: |
+
+# vcs for this configuration (git / svn)
+ish_vcs: git
+
+# svn base_url (only when ish_vcs = svn)
+#ish_svn_baseurl: 'https://svn.intershop.de/ics/webasto/Source'
+
+# svn username
+#ish_svn_username:
+
+# svn password
+#ish_svn_password:
+
+# arguments for svn
+ish_svn_args: --username={{ish_svn_username}} --password={{ish_svn_password}} --no-auth-cache --non-interactive
+
+
+# create repositories
+ish_repos:
+  - { src: '{{ish_home}}/{{ish_bootstrap_directory}}', repo: '{{ish_svn_baseurl}}/devops/{{ish_bootstrap_directory}}' }
+  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-distribution', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-distribution' }
+  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-plugins', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-plugins' }
+  - { src: '{{ish_setupDirectory}}/projects/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/projects/{{ish_projectName}}' }
+  - { src: '{{ish_setupDirectory}}/projects/oracleDriver', repo: '{{ish_svn_baseurl}}/projects/oracleDriver/p_oracle' }
+  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}' }
+  - { src: '{{ish_setupDirectory}}/devops/ci_server/user_home', repo: '{{ish_svn_baseurl}}/devops/ci_server/user_home' }
+  - { src: '{{ish_setupDirectory}}/devops/ci_server/host_configs', repo: '{{ish_svn_baseurl}}/devops/ci_server/host_configs' }
+
+# configure build.gradle
+ish_content_changes:
+  - {dest: "{{ish_componentSetName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
+  - {dest: "{{ish_componentSetName}}/.project", regexp: "(<projectDescription>\\v*\\s*<name>).*(</name>)", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
+  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
+  - {dest: "{{ish_componentSetName}}/gradle.properties", regexp: "(\\s*version\\s*=\\s*).*", replace: "\\g<1>{{ish_version}}" }
+  - {dest: "{{ish_assemblyName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_assemblyName}}\\g<2>" }
+  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(Cartridges.collect \\{\").*({{':'}}\\$it\"\\})", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
+  - {dest: "{{ish_assemblyName}}/gradle.properties", regexp: "(# componentsets with the same live cycle\\v*\\s*filter).*$", replace: "\\g<1>.{{ish_corporateName}}.{{ish_componentSetName}} = {{ish_version}}%suffix%" }
+  
+# Login token for gitlab
+#ish_gitlab_login_token:
+
+# Gitlab server URL
+#ish_gitlab_server_url: https://gitlab.intershop.de
+
+# Gitlab group for new repositories (needs to be exist)
+#ish_gitlab_group:
+
+# git user name
+#ish_git_user_name:
+
+# git user email
+#ish_git_user_email:
+
+# git config
+ish_git_config: |
+  [user]
+          name = {{ish_git_user_name}}
+          email = {{ish_git_user_email}}
+  [push]
+          default = simple
+       
+```
+== License
+
+Copyright 2014-2016 Intershop Communications.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.

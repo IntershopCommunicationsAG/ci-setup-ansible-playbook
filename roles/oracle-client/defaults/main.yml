@@ -1,0 +1,7 @@
+---
+# Oracle Client defaults
+#oracle_client_download_url:
+oracle_user: oracle
+oracle_group: oinstall
+oracle_base: /opt/oracle
+oracle_client_home: "{{ oracle_base }}/product/11.2.0/client_1"

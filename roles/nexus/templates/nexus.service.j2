@@ -1,0 +1,13 @@
+[Unit]
+Description=Nexus service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/opt/sonatype-nexus/nexus/bin/nexus start
+ExecStop=/opt/sonatype-nexus/nexus/bin/nexus stop
+User=nexus
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

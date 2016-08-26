@@ -1,0 +1,76 @@
+---
+- name: create nexus user
+  user: name=nexus
+  
+- name: create directories
+  file: path="{{item}}" owner=nexus group=nexus state=directory
+  with_items:
+   - /opt/sonatype-nexus
+   - /opt/sonatype-work
+   - /opt/sonatype-work/nexus
+
+- name: open firewall
+  firewalld: port=8081/tcp permanent=true state=enabled immediate=yes
+
+- name: extract {{nexus_download_url|basename}}
+  unarchive: src={{nexus_download_url}} dest=/opt/sonatype-nexus owner=nexus group=nexus copy=no
+  register: untar
+
+- name: register directory name
+  shell: ls -dt /opt/sonatype-nexus/nexus-*
+  when: "{{untar.changed}}"
+  register: nexusdir
+
+- name: symlink nexus
+  when: "{{nexusdir.changed}}"
+  file: src={{nexusdir.stdout_lines[0]|basename}} dest=/opt/sonatype-nexus/nexus state=link
+
+- name: create nexus unit file
+  template: src=templates/nexus.service.j2 dest=/etc/systemd/system/nexus.service
+  register: nexusunit
+  
+- name: reload systemd daemon
+  when: "{{nexusunit.changed}}"
+  shell: systemctl daemon-reload
+ 
+- name: enable service and start nexus
+  service: name=nexus.service enabled=yes state=started
+  register: servicestart
+  
+- name: wait for service start
+  wait_for: port=8081 host={{ansible_hostname}} timeout=60
+  
+- name: Change default password admin
+  uri: user=admin password={{nexus_initial_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/users_setpw method=POST body_format=json status_code=204 body={"data":{"userId":"admin","newPassword":"{{nexus_admin_password}}"}}
+
+- name: Change default password deployment
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/users_setpw method=POST body_format=json status_code=204 body={"data":{"userId":"deployment","newPassword":"{{nexus_deployment_password}}"}}
+  
+- name: Create Intershop repository
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"proxy","id":"ishrepo","name":"Intershop","browseable":true,"indexable":true,"notFoundCacheTTL":1440,"artifactMaxAge":-1,"metadataMaxAge":1440,"itemMaxAge":1440,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","defaultLocalStorageUrl":"file:/opt/sonatype-nexus/sonatype-work/nexus/storage/ishrepo/","downloadRemoteIndexes":true,"autoBlockActive":true,"fileTypeValidation":true,"exposed":true,"checksumPolicy":"WARN","remoteStorage":{"remoteStorageUrl":"{{nexus_ishrepo_url}}","authentication":{"username":"{{nexus_ishrepo_user}}","password":"{{nexus_ishrepo_password}}"},"connectionSettings":null}}}
+  
+- name: Create jcenter repository
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"proxy","id":"jcenter","name":"JCenter","browseable":true,"indexable":true,"notFoundCacheTTL":1440,"artifactMaxAge":-1,"metadataMaxAge":1440,"itemMaxAge":1440,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","downloadRemoteIndexes":true,"autoBlockActive":true,"fileTypeValidation":true,"exposed":true,"checksumPolicy":"WARN","remoteStorage":{"remoteStorageUrl":"https://jcenter.bintray.com/","authentication":null,"connectionSettings":null}}}
+  
+- name: Create gradle repository
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"hosted","id":"gradle","name":"Gradle","writePolicy":"ALLOW_WRITE_ONCE","browseable":true,"indexable":true,"exposed":true,"notFoundCacheTTL":0,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","defaultLocalStorageUrl":"file:/opt/sonatype-nexus/sonatype-work/nexus/storage/gradle/","downloadRemoteIndexes":false,"checksumPolicy":"IGNORE"}}
+
+- name: Create distributions repository
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"hosted","id":"distributions","name":"Distributions","writePolicy":"ALLOW_WRITE_ONCE","browseable":true,"indexable":true,"exposed":true,"notFoundCacheTTL":0,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","defaultLocalStorageUrl":"file:/opt/sonatype-nexus/sonatype-work/nexus/storage/distributions/","downloadRemoteIndexes":false,"checksumPolicy":"IGNORE"}}
+  
+- name: Create components group
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repo_groups method=POST body_format=json status_code=201 body={"data":{"id":"components","name":"Components","format":"maven2","exposed":true,"provider":"maven2","repositories":[{"id":"ishrepo"},{"id":"releases"},{"id":"gradle"}]}}
+  
+- name: Create mavenall group
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repo_groups method=POST body_format=json status_code=201 body={"data":{"id":"mavenall","name":"Maven all","format":"maven2","exposed":true,"provider":"maven2","repositories":[{"id":"jcenter"},{"id":"central"},{"id":"ishrepo"}]}}
+  
+- name: Delete unused repositories/groups
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/{{item}} method=DELETE status_code=204,404
+  with_items:
+    - repo_groups/public
+    - repositories/central-m1
+    - repositories/apache-snapshots
+    - repositories/thirdparty
+
+- name: Disable discovery
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories/ishrepo/routing/config method=PUT body_format=json status_code=200 body={"data":{"discoveryEnabled":false,"discoveryIntervalHours":-1}}

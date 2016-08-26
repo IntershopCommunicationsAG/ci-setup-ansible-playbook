@@ -1,0 +1,17 @@
+---
+# !!! nbuild has no access via login_token: Workaround create group and grant owner access to nbuild. !!!
+#- name: create gitlab group
+#  local_action: gitlab_group
+#                login_token={{ish_gitlab_login_token}}
+#                server_url={{ish_gitlab_server_url}}
+#                name={{ish_gitlab_group}}
+#                path={{ish_gitlab_group}}
+#                validate_certs=true
+#                state=present
+- name: install subversion
+  yum: name=subversion state=present
+
+- name: create svndirectories
+  include: svnrepo.yml
+  with_items:
+    - "{{ish_repos}}"

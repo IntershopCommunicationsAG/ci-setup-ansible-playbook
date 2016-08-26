@@ -1,0 +1,9 @@
+---
+#oracle_client_download_url:
+oracle_user: oracle
+oracle_group: oinstall
+oracle_base: /opt/oracle
+oracle_server_home: "{{ oracle_base }}/product/11.2.0/dbhome_1"
+oracle_password: intershop
+oracle_sid: ISORCL1
+oracle_service: isdb1

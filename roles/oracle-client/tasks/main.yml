@@ -1,0 +1,21 @@
+---
+- name: create {{oracle_group}} group
+  group: name={{oracle_group}}
+  
+- name: create dba group
+  group: name=dba
+  
+- name: create {{oracle_user}} user
+  user: name={{oracle_user}} group={{oracle_group}} groups=dba
+  
+- name: install unzip
+  yum: name=unzip state=present
+
+- name: check {{oracle_client_home}} client installation
+  stat: path="{{oracle_client_home}}/bin/sqlplus"
+  register: checkoraclehome
+  ignore_errors: true
+  
+- name: include install oracle_client
+  include: oracle.yml
+  when: checkoraclehome.stat.exists == false

@@ -1,0 +1,114 @@
+---
+- name: create intershop user
+  user: name={{ish_user}} groups={{ish_groups}} home={{ish_home}}
+  
+- name: create {{ish_home}}/.ssh
+  file: name={{ish_home}}/.ssh state=directory owner={{ish_user}} group={{ish_group}}
+
+- name: write ssh private key  
+  template: src=item.j2 dest={{ish_home}}/.ssh/id_rsa owner={{ish_user}} group={{ish_group}} mode="0600"
+  with_items:
+    - "{{ish_user_sshkey}}"
+
+- name: write authorized_keys
+  template: src=item.j2 dest={{ish_home}}/.ssh/authorized_keys owner={{ish_user}} group={{ish_group}}
+  with_items:
+    - "{{ish_user_authorized_keys}}"
+  
+- name: install unzip
+  yum: name=unzip state=present
+  
+- name: check bootstrap_directory
+  stat: path={{ish_home}}/{{ish_bootstrap_directory}}
+  register: bsexists
+  
+- name: install bootstrap
+  unarchive: src={{ish_bootstrap_archive_url}} copy=no dest={{ish_home}} owner={{ish_user}} group={{ish_group}}
+  when: bsexists.stat.exists==false
+  
+- name: adjust build.gradle
+  lineinfile: dest={{ish_home}}/{{ish_bootstrap_directory}}/build.gradle regexp="^(\s*{{item.key}}\s*=\s*)" line="\1'{{item.value}}'" backrefs=yes
+  with_items:
+    - {key: 'setupDirectory', value: '{{ish_setupDirectory}}'}
+    - {key: 'corporateName', value: '{{ish_corporateName}}'}
+    - {key: 'repoBaseURL', value: '{{ish_repoBaseURL}}'}
+    - {key: 'projectName', value: '{{ish_projectName}}'}
+    - {key: 'assemblyName', value: '{{ish_assemblyName}}'}
+    - {key: 'componentSetName', value: '{{ish_componentSetName}}'}
+    - {key: 'hostName', value: '{{ish_hostName}}'}
+
+- name: adjust build.gradle mavenall
+  lineinfile: dest={{ish_home}}/{{ish_bootstrap_directory}}/build.gradle regexp="^(\s*url\s*)'" line="\1'{{ish_repoBaseURL}}/groups/mavenall'" backrefs=yes
+        
+- name: generate sources
+  shell: sh gradlew intershopCISetupAll
+  args:
+    chdir: "{{ish_home}}/{{ish_bootstrap_directory}}/"
+  become: yes
+  become_user: "{{ish_user}}"
+
+- name: copy oracle files
+  shell: cp {{oracle_client_home}}/{{item}} {{ish_setupDirectory}}/projects/oracleDriver/p_oracle/3rd_oracle/staticfiles/cartridge/lib
+  become: yes
+  become_user: "{{ish_user}}"
+  with_items:
+    - jdbc/lib/ojdbc7.jar
+    - opmn/lib/ons.jar
+    - ucp/lib/ucp.jar
+
+- name: write ignore.txt  
+  template: src=item.j2 dest={{ish_home}}/ignore.txt owner={{ish_user}} group={{ish_group}}
+  with_items:
+    - |
+        build
+        .gradle
+        bin
+        target
+
+- name: create vcs repositories
+  include: "{{ish_vcs}}.yml"
+  when: ish_vcs in avail_vcs
+  
+- name: install starter store componentSet
+  unarchive: src={{ish_starterstore_set}} dest={{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_componentSetName}} copy=no owner={{ish_user}} group={{ish_group}}
+
+- name: install starter store assemblyName
+  unarchive: src={{ish_starterstore_assembly}} dest={{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_assemblyName}} copy=no owner={{ish_user}} group={{ish_group}}
+  
+- name: mv contents
+  shell: cd {{item.directory}} && mv {{item.arcname}}/* . && mv {{item.arcname}}/.* . ; rmdir {{item.arcname}}
+  with_items:
+    - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_componentSetName}}", arcname: a_responsive}
+    - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_assemblyName}}", arcname: inspired-b2x}
+  become: yes
+  become_user: "{{ish_user}}"
+  
+- name: change contents responsive starter store
+  replace: dest={{ish_setupDirectory}}/projects/{{ish_projectName}}/{{item.dest}} regexp={{item.regexp}} replace={{item.replace}}
+  become: yes
+  become_user: "{{ish_user}}"
+  with_items: "{{ish_content_changes}}"
+
+- name: add files to svn
+  shell: svn add . --force -q && svn ci {{ish_svn_args}} -m "add responsive starter store"
+  args:
+    chdir: "{{ish_setupDirectory}}/projects/{{ish_projectName}}" 
+  become: yes
+  become_user: "{{ish_user}}"
+  when: ish_vcs=='svn'
+
+- name: add files to git
+  shell: git add . && git commit -m "add responsive starter store" && git push
+  args:
+    chdir: "{{ish_setupDirectory}}/projects/{{ish_projectName}}" 
+  become: yes
+  become_user: "{{ish_user}}"
+  when: ish_vcs=='git'
+
+- name: add license directory
+  file: path={{ish_home}}/license owner={{ish_user}} group={{ish_group}} state=directory
+  
+- name: add license.xml
+  template: src=item.j2 dest={{ish_home}}/license/license.xml owner={{ish_user}} group={{ish_group}}
+  with_items: "{{ish_license}}"
+  

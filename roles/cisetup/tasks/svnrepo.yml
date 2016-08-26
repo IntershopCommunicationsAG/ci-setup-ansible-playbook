@@ -1,0 +1,17 @@
+---
+- name: set facts
+  set_fact: 
+    repourl: "{{item.repo}}"
+    srcdir: "{{item.src}}"
+  
+- name: create svn directories
+  shell: |
+    svn mkdir {{ish_svn_args}} --parents {{repourl}}/branches -m "create branches"
+    svn mkdir {{ish_svn_args}} --parents {{repourl}}/tags -m "create tags"
+    svn import {{ish_svn_args}} {{srcdir}} {{repourl}}/trunk -m "add {{repourl|basename}}"
+    svn {{ish_svn_args}} co --force {{repourl}}/trunk {{srcdir}}
+    svn revert -R {{srcdir}}
+    svn propset svn:ignore -F ~/ignore.txt {{srcdir}}
+    svn commit {{ish_svn_args}} {{srcdir}} -m "add svn ignore"
+  become: yes
+  become_user: "{{ish_user}}"

@@ -1,0 +1,26 @@
+---
+- name: set facts
+  set_fact: 
+    reponame: "{{item.repo|regex_replace('^.*/(.*?)/(.*?)$', '\\1-\\2')}}"
+    srcdir: "{{item.src}}"
+  
+- name: create gitlab project
+  local_action: gitlab_project
+                login_token={{ish_gitlab_login_token}}
+                group={{ish_gitlab_group}}
+                server_url={{ish_gitlab_server_url}}
+                name={{reponame}}
+                state=present
+
+- name: initialize gitlab
+  shell: |
+    cp ~/ignore.txt .gitignore
+    git init
+    git remote add origin git@{{gitlab_servername}}:{{ish_gitlab_group}}/{{reponame}}.git
+    git add .
+    git commit -m "Initial commit"
+    git push -u origin master
+  args:
+    chdir: "{{srcdir}}"
+  become: yes
+  become_user: "{{ish_user}}"

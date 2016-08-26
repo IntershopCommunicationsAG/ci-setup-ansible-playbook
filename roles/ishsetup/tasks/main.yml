@@ -1,0 +1,35 @@
+---
+- name: create intershop user
+  user: name={{ish_user}} groups={{ish_groups}} home={{ish_home}} password=1ntersh0p
+
+- name: create {{ish_home}}/.ssh
+  file: name={{ish_home}}/.ssh state=directory owner={{ish_user}} group={{ish_group}}
+
+- name: write ssh private key  
+  template: src=item.j2 dest={{ish_home}}/.ssh/id_rsa owner={{ish_user}} group={{ish_group}} mode="0600"
+  with_items:
+    - "{{ish_user_sshkey}}"
+
+- name: write authorized_keys
+  template: src=item.j2 dest={{ish_home}}/.ssh/authorized_keys owner={{ish_user}} group={{ish_group}}
+  with_items:
+    - "{{ish_user_authorized_keys}}"
+
+- name: install rsync
+  yum: name=rsync state=present
+
+- name: install unzip
+  yum: name=unzip state=present
+
+- name: add license directory
+  file: path={{ish_home}}/license owner={{ish_user}} group={{ish_group}} state=directory
+
+- name: add license.xml
+  template: src=item.j2 dest={{ish_home}}/license/license.xml owner={{ish_user}} group={{ish_group}}
+  with_items: "{{ish_license}}"
+
+- name: open firewall http
+  firewalld: port=80/tcp permanent=true state=enabled immediate=yes
+
+- name: open firewall https
+  firewalld: port=443/tcp permanent=true state=enabled immediate=yes

@@ -1,0 +1,50 @@
+---
+- name: check {{oracle_server_home}} server installation
+  stat: path="{{oracle_server_home}}/bin/sqlplus"
+  register: checkoraclehome
+  ignore_errors: true
+  
+- name: include install oracle_server
+  include: oracle.yml
+  when: checkoraclehome.stat.exists == false
+
+- name: remove Oracle server installation directory
+  file: path="{{ installer_dir }}" state=absent
+  
+- name: create {{oracle_sid}}.environment
+  template: src=oraenv.j2 dest=/home/{{oracle_user}}/{{oracle_sid}}.sh owner={{oracle_user}} group={{oracle_group}} mode="0600" 
+  
+- name: create environment for {{oracle_user}} user
+  lineinfile: dest=/home/{{oracle_user}}/.bashrc line="source /home/{{oracle_user}}/{{oracle_sid}}.sh"
+  
+- name: enable instance in oratab
+  lineinfile: dest=/etc/oratab regexp="(^\s*{{oracle_sid}}:{{oracle_server_home}}:)" line="\1Y" backrefs=yes
+  
+- name: create unit file
+  template: src=db_service.j2 dest=/etc/systemd/system/oracledb.service
+  register: dbservice
+  
+- name: reload systemd daemon
+  when: dbservice.changed
+  shell: systemctl daemon-reload
+ 
+- name: enable service and start oracle
+  service: name=oracledb.service enabled=yes state=started
+  register: servicestart
+
+- name: open firewall
+  firewalld: port=1521/tcp permanent=true state=enabled immediate=yes
+
+- name: create dbsetup files
+  unarchive: src=dbsetup.tar.gz dest=.
+  become: yes
+  become_user: "{{oracle_user}}"
+  register: dbsetupfiles
+  
+- name: execute dbsetup.sqlplus
+  shell: source ISORCL1.sh ; cd dbsetup ; sqlplus /nolog @dbsetup.sql
+  args:
+    executable: /bin/bash
+  become: yes
+  become_user: "{{oracle_user}}"
+  when: dbsetupfiles.changed

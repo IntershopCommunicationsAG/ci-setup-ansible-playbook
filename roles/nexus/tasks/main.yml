@@ -1,0 +1,9 @@
+---
+- name: Check maven all group
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repo_groups/mavenall method=GET status_code=200
+  ignore_errors: true
+  register: checknexus
+  
+- name: do nexus installation
+  include: nexus.yml
+  when: "{{checknexus.status}} != 200"

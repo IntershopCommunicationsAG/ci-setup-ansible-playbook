@@ -1,0 +1,10 @@
+---
+# oracle-server vars
+installer_dir: /tmp/database
+installer_script: "{{ installer_dir }}/runInstaller"
+installer_opts: "-silent -waitforcompletion -responseFile"
+response_file: "{{ installer_dir }}/response/db_install.rsp"
+oracle_inventory_dir: "/home/oracle/oraInventory"
+oracle_inventory_script: "{{ oracle_inventory_dir }}/orainstRoot.sh"
+success_message: 'Successfully Setup Software'
+oracle_cfgrsp: "/home/oracle/cfgrsp.properties"

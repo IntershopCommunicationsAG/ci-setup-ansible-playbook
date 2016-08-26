@@ -1,0 +1,8 @@
+---
+nexus_download_url: http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz
+#nexus_ishrepo_url:
+#nexus_ishrepo_user:
+#nexus_ishrepo_password:
+nexus_initial_admin_password: admin123
+nexus_admin_password: admin123
+nexus_deployment_password: deployment123
