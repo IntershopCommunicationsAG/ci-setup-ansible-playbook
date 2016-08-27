@@ -1,15 +1,15 @@
-= Ansible role ishsetup
+= CI setup ansible
 :latestRevision: 1.0.0
 :toc:
 
 == Summary
-This ansible role setup the ci environment
+This ansibles roles are intended to setup a continues integration environment using nexus and jenkins.
 
 Preconditions:
 
-* nexus installed and configured
-* oracle jdk installed
-* oracle client installed
+* CentOS 7 machine
+* Ansible server
+* Internet access
 
 == Configuration
 Default values are defined in `defaults/main.yml`. Commented values must be configured in Ansible.
