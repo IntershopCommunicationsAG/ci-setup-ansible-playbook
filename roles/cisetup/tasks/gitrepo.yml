@@ -6,7 +6,7 @@
   
 - name: create gitlab project
   local_action: gitlab_project
-                login_token={{ish_gitlab_login_token}}
+                login_token={{ish_gitlab_token}}
                 group={{ish_gitlab_group}}
                 server_url={{ish_gitlab_server_url}}
                 name={{reponame}}

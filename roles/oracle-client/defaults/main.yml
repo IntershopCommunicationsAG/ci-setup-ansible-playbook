@@ -1,7 +1,15 @@
 ---
-# Oracle Client defaults
+# Download URL for client-installation
 #oracle_client_download_url:
+
+# oracle user
 oracle_user: oracle
+
+# oracle group
 oracle_group: oinstall
+
+# oracle base
 oracle_base: /opt/oracle
+
+# oracle client home
 oracle_client_home: "{{ oracle_base }}/product/11.2.0/client_1"

@@ -1,10 +1,24 @@
 ---
-# Oracle client vars
+# oracle client setup filename
 oracle_archive: "{{oracle_client_download_url|basename}}"
+
+# install directory
 installer_dir: /tmp/client
+
+# install script
 installer_script: "{{ installer_dir }}/runInstaller"
+
+# arguments for install script
 installer_opts: "-silent -waitforcompletion -responseFile"
+
+# path to response file
 response_file: "{{ installer_dir }}/response/client_install.rsp"
+
+# path to oracle inventory
 oracle_inventory_dir: "/home/oracle/oraInventory"
+
+# path to update inventory script
 oracle_inventory_script: "{{ oracle_inventory_dir }}/orainstRoot.sh"
+
+# Check output for message
 success_message: 'Successfully Setup Software'

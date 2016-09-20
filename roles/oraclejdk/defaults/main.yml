@@ -1,3 +1,6 @@
 ---
-jdk_download_url: http://download.oracle.com/otn-pub/java/jdk/8u92-b14/jdk-8u92-linux-x64.rpm
-jdk_version: 1.8.0_92
+# JDK download URL
+jdk_download_url: http://download.oracle.com/otn-pub/java/jdk/8u102-b14/jdk-8u102-linux-x64.rpm
+
+# JDK version
+jdk_version: 1.8.0_102

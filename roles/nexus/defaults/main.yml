@@ -1,8 +1,21 @@
 ---
+# nexus download url
 nexus_download_url: http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz
+
+# nexus url for using repo.intershop.de
 #nexus_ishrepo_url:
+
+# user token for using repo.intershop.de
 #nexus_ishrepo_user:
+
+# password for user token
 #nexus_ishrepo_password:
+
+# nexus initial passowrd
 nexus_initial_admin_password: admin123
+
+# nexus admin password
 nexus_admin_password: admin123
+
+# nexus deployment password
 nexus_deployment_password: deployment123

@@ -1,6 +1,6 @@
 ---
 - name: create intershop user
-  user: name={{ish_user}} groups={{ish_groups}} home={{ish_home}} password=1ntersh0p
+  user: name={{ish_user}} groups={{ish_groups}} home={{ish_home}} password={{ish_password}}
 
 - name: create {{ish_home}}/.ssh
   file: name={{ish_home}}/.ssh state=directory owner={{ish_user}} group={{ish_group}}
@@ -29,7 +29,7 @@
   with_items: "{{ish_license}}"
 
 - name: open firewall http
-  firewalld: port=80/tcp permanent=true state=enabled immediate=yes
+  firewalld: port={{ish_http}}/tcp permanent=true state=enabled immediate=yes
 
 - name: open firewall https
-  firewalld: port=443/tcp permanent=true state=enabled immediate=yes
+  firewalld: port={{ish_https}}/tcp permanent=true state=enabled immediate=yes

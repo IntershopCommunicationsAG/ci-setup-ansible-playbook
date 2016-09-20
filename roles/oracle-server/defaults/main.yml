@@ -1,9 +1,26 @@
 ---
-#oracle_client_download_url:
+# List of oracle database installation files url
+#oracle_server_download_files:
+# - file1
+# - file2
+
+# Installation user for oracle database
 oracle_user: oracle
+
+# Group of installation user
 oracle_group: oinstall
+
+# Oracle base directory
 oracle_base: /opt/oracle
+
+# Oracle server home
 oracle_server_home: "{{ oracle_base }}/product/11.2.0/dbhome_1"
+
+# Admmin password (sys, system)
 oracle_password: intershop
+
+# Oracle SID for new instance
 oracle_sid: ISORCL1
+
+# Oracle Service name for new instance
 oracle_service: isdb1

@@ -1,127 +1,92 @@
-= CI setup ansible
+= ci setup ansible playbook
 :latestRevision: 1.0.0
 :toc:
 
 == Summary
 This ansibles roles are intended to setup a continues integration environment using nexus and jenkins.
 
-Preconditions:
+=== Preconditions:
 
-* CentOS 7 machine
-* Ansible server
+* https://www.centos.org/[CentOS 7] machine
+* Installed http://docs.ansible.com/ansible/intro.html[Ansible]
 * Internet access
 
+== Sample playbooks
+
+=== setupci.yml
+This playbook setup a complete ci environment including
+
+* Oracle Java JDK
+* Oracle Server
+* Oracle Client
+* Nexus
+* Jenkins
+* project setup
+* Initialization of git (gitlab) or svn repositories
+
+=== ishsystem.yml
+This playbook setup a new host for deploying an intershop system
+
+* Oracle Java JDK
+* Oracle Server
+* Oracle Server
+* User for running deployment and intershop environment
+
+== Roles
+
+=== cisetup
+Role for create project user / groups. This role also execute the project-bootstrap tasks and imports the responsive starter store. SVN repositories or git-repositories on gitlab-Server are initialized by this role
+
+=== ishsetup
+Role for creating an environment to execute an intershop server deployment.
+
+=== jenkins
+Role for installing Jenkins. For now there is no configuration of Jenkins included.
+
+=== nexus
+Role for installing and configuring nexus. All needed repositories and proxy-repositories are created by this role.
+
+=== oracle-client
+Installs Oracle Client. For now this role was only tested with Oracle 12.1.0.2
+
+=== oracle-server
+Installs Oracle Server. For new this role was only tested with Oracle 12.1.0.2 (EE)
+
+=== oraclejdk
+Role for installing Oracle JDK
+
 == Configuration
-Default values are defined in `defaults/main.yml`. Commented values must be configured in Ansible.
-```
----
-# User for ci setup
-ish_user: intershop
 
-# Group for ish_user
-ish_group: "{{ish_user}}"
+Default values for the roles are configured in `roles\*\defaults\main.yml`
+Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`. *It is highly recommended to encrypt sensitive data like passwords, user tokens and licenses with Ansible vault. See http://docs.ansible.com/ansible/playbooks_vault.html[Ansible documentation] for details
+[cols="17%,17%,85%", width="90%, options="header"]
+|===
+|Name | Sample | Description
+3+| *ROLE CISETUP* / ishsetup
+| *ish_password*      | `$1$...`            | Encrypted password. See http://docs.ansible.com/ansible/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module[Ansible documentation] for details
+| *ish_corporateName* | `com.example`       | Provide a reverse domain name
+| *ish_projectName*   | `corporateshop`     | Provide a name using only letters, numbers and underscores (no spaces or other special characters)
+| *ish_license*       | `<?xml version ...` | Provide the contents of your Intershop License File
+3+| *SVN-Configuration*
+| *ish_svn_baseurl* | `https://svn.example.com/svn/myproject/source`| SVN Base URL
+| *ish_svn_username* | `myuser`             | Username for SVN access
+| *ish_svn_password* | `password`           | Password for SVN access
+3+| *Git / gitlab-Configuration*
+| *ish_gitlab_token* | `yourtoken`          | Token for gitlab access
+| *ish_gitlab_server_url* | `https://gitlab.example.com` | Gitlab server URL
+| *ish_gitlab_group* | `corporateshop` | Group for the repositories to initialize
+| *ish_git_user_name* | `gituser` | username for git user
+| *ish_git_user_email* | `gituser@example.com` | email for gituser
+3+| *ROLE NEXUS*
+| *nexus_ishrepo_url* | `https://repo.intershop.de/content/repository/4711` | Url for access Intershop Repository server
+| *nexus_ishrepo_user* | `usertoken` | usertoken for access Intershop Repository server
+| *nexus_ishrepo_password* | `secret` | password for usertoken
+3+| *ROLE ORACLE-CLIENT*
+| *oracle_client_download_url* | `https://install.example.com/oracle/linuxamd64_12102_client.zip` | Location for Oracle client installation file
+3+| *ROLE ORACLE-SERVER*
+| *oracle_server_download_files* | `- https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip - https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip` | Location for Oracle server installation files
+|===
 
-# additional groups
-ish_groups: dba
-
-# home directory for ish_user
-ish_home: /opt/intershop
-
-# Url for bootstrap archive
-ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intershop/build/infrastructure/intershop-ci-setup-bootstrap/3.3.0/intershop-ci-setup-bootstrap-3.3.0.zip"
-
-# Directory where to expand the bootstrap (relative to ish_home)
-ish_bootstrap_directory: intershop-ci-setup-bootstrap
-
-# setupDirectory for ci-configuration
-ish_setupDirectory: '{{ish_home}}/ci-source'
-
-# hostname for ci-configuration
-ish_hostName: '{{ansible_hostname}}'
-
-# repoBaseURL for ci-configuration
-ish_repoBaseURL: 'http://{{ansible_fqdn}}:8081/nexus/content'
-
-# assemblyName for ci-configuration
-ish_assemblyName: 'assembly'
-
-# componentSetName for ci-configuration
-ish_componentSetName: 'componentSet'
-
-# corporateName for ci-configuration
-#ish_corporateName:
-
-# projectName for ci-configuration
-#ish_projectName:
-
-# license for ci-configuration
-# put content of license.xml
-#ish_license: |
-
-# vcs for this configuration (git / svn)
-ish_vcs: git
-
-# svn base_url (only when ish_vcs = svn)
-#ish_svn_baseurl: 'https://svn.intershop.de/ics/webasto/Source'
-
-# svn username
-#ish_svn_username:
-
-# svn password
-#ish_svn_password:
-
-# arguments for svn
-ish_svn_args: --username={{ish_svn_username}} --password={{ish_svn_password}} --no-auth-cache --non-interactive
-
-
-# create repositories
-ish_repos:
-  - { src: '{{ish_home}}/{{ish_bootstrap_directory}}', repo: '{{ish_svn_baseurl}}/devops/{{ish_bootstrap_directory}}' }
-  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-distribution', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-distribution' }
-  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-plugins', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-plugins' }
-  - { src: '{{ish_setupDirectory}}/projects/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/projects/{{ish_projectName}}' }
-  - { src: '{{ish_setupDirectory}}/projects/oracleDriver', repo: '{{ish_svn_baseurl}}/projects/oracleDriver/p_oracle' }
-  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}' }
-  - { src: '{{ish_setupDirectory}}/devops/ci_server/user_home', repo: '{{ish_svn_baseurl}}/devops/ci_server/user_home' }
-  - { src: '{{ish_setupDirectory}}/devops/ci_server/host_configs', repo: '{{ish_svn_baseurl}}/devops/ci_server/host_configs' }
-
-# configure build.gradle
-ish_content_changes:
-  - {dest: "{{ish_componentSetName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
-  - {dest: "{{ish_componentSetName}}/.project", regexp: "(<projectDescription>\\v*\\s*<name>).*(</name>)", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
-  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
-  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
-  - {dest: "{{ish_componentSetName}}/gradle.properties", regexp: "(\\s*version\\s*=\\s*).*", replace: "\\g<1>{{ish_version}}" }
-  - {dest: "{{ish_assemblyName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_assemblyName}}\\g<2>" }
-  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
-  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(Cartridges.collect \\{\").*({{':'}}\\$it\"\\})", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
-  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
-  - {dest: "{{ish_assemblyName}}/gradle.properties", regexp: "(# componentsets with the same live cycle\\v*\\s*filter).*$", replace: "\\g<1>.{{ish_corporateName}}.{{ish_componentSetName}} = {{ish_version}}%suffix%" }
-  
-# Login token for gitlab
-#ish_gitlab_login_token:
-
-# Gitlab server URL
-#ish_gitlab_server_url: https://gitlab.intershop.de
-
-# Gitlab group for new repositories (needs to be exist)
-#ish_gitlab_group:
-
-# git user name
-#ish_git_user_name:
-
-# git user email
-#ish_git_user_email:
-
-# git config
-ish_git_config: |
-  [user]
-          name = {{ish_git_user_name}}
-          email = {{ish_git_user_email}}
-  [push]
-          default = simple
-       
-```
 == License
 
 Copyright 2014-2016 Intershop Communications.

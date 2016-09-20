@@ -1,6 +1,0 @@
----
-- hosts: vms
-  roles:
-    - common
-    - oraclejdk
-    - nexus

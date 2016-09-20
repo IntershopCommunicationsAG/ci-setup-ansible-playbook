@@ -1,4 +1,0 @@
----
-- hosts: vms
-  roles:
-    - jenkins

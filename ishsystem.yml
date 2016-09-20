@@ -1,7 +1,6 @@
 ---
 - hosts: vms
   roles:
-    - common
     - oraclejdk
     - oracle-client
     - oracle-server

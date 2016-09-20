@@ -29,5 +29,3 @@
 - name: disable setup wizard
   uri: user=admin password={{initialAdminPassword}} url=http://localhost:8080/setupWizard/completeInstall force_basic_auth=true
   register: crumb
-    
- 
