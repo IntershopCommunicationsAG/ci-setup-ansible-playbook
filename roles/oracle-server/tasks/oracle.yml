@@ -61,6 +61,12 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
     mode: 0640
+
+- name: create Oracle base directory
+  file: path="{{ oracle_base }}" state=directory owner="{{ oracle_user }}"  group="{{ oracle_group }}" mode=0755
+
+- name: create OraInventory directory
+  file: path="{{ oracle_inventory_dir }}" state=directory owner="{{ oracle_user }}"  group="{{ oracle_group }}" mode=0755
     
 - name: install Oracle server
   become_user: "{{ oracle_user }}"

@@ -1,4 +1,21 @@
 ---
+- name: create {{oracle_group}} group
+  group: name={{oracle_group}}
+  
+- name: create dba group
+  group: name=dba
+  
+- name: create {{oracle_user}} user
+  user: name={{oracle_user}} group={{oracle_group}} groups=dba
+  
+- name: install unzip
+  yum: name=unzip state=present
+  
+- name: prepare /etc/hosts for use with oracle
+  shell: |
+    cp /etc/hosts /etc/hosts.ori
+    awk '$1~"^127.0.0.1|::1"{$2="'`hostname -s`'\ '`hostname`' "$2}1' OFS="\t" /etc/hosts.ori > /etc/hosts
+
 - name: check {{oracle_server_home}} server installation
   stat: path="{{oracle_server_home}}/bin/sqlplus"
   register: checkoraclehome
@@ -36,13 +53,16 @@
   firewalld: port=1521/tcp permanent=true state=enabled immediate=yes
 
 - name: create dbsetup files
-  unarchive: src=dbsetup.tar.gz dest=.
+  unarchive: src=dbsetup.tar.gz dest=/tmp
   become: yes
   become_user: "{{oracle_user}}"
   register: dbsetupfiles
   
 - name: execute dbsetup.sqlplus
-  shell: source ISORCL1.sh ; cd dbsetup ; sqlplus /nolog @dbsetup.sql
+  shell: |
+    source /home/{{oracle_user}}/{{oracle_sid}}.sh || exit 1
+    cd /tmp/dbsetup || exit 1
+    sqlplus /nolog @dbsetup.sql
   args:
     executable: /bin/bash
   become: yes
