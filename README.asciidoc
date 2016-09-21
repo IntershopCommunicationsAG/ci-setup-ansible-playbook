@@ -63,6 +63,7 @@ Commented values needs to be set. Unconfigured commented values needs to be defi
 |===
 |Name | Sample | Description
 3+| *ROLE CISETUP* / ishsetup
+| *ish_user_sshkey*   | `-----BEGIN RSA PRIVATE KEY ...` | ssh-Key for gitlab pushes
 | *ish_password*      | `$1$...`            | Encrypted password. See http://docs.ansible.com/ansible/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module[Ansible documentation] for details
 | *ish_corporateName* | `com.example`       | Provide a reverse domain name
 | *ish_projectName*   | `corporateshop`     | Provide a name using only letters, numbers and underscores (no spaces or other special characters)

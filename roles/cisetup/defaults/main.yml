@@ -5,6 +5,9 @@ ish_user: intershop
 # Group for ish_user
 ish_group: "{{ish_user}}"
 
+# ssh private key for gitlab access
+#ish_user_sshkey: |
+
 # additional groups
 ish_groups: dba
 
