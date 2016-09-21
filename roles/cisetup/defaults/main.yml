@@ -8,6 +8,11 @@ ish_group: "{{ish_user}}"
 # ssh private key for gitlab access
 #ish_user_sshkey: |
 
+# ssh authorized_keys for ish_user
+ish_user_authorized_keys: |
+  #Put your ssh-public keys here
+  ssh-rsa ....
+
 # additional groups
 ish_groups: dba
 
