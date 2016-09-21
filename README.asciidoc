@@ -87,6 +87,10 @@ Commented values needs to be set. Unconfigured commented values needs to be defi
 | *oracle_server_download_files* | `- https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip - https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip` | Location for Oracle server installation files
 |===
 
+For more information please see
+
+* https://support.intershop.com/kb/index.php/Display/X27327.
+
 == License
 
 Copyright 2014-2016 Intershop Communications.
