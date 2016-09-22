@@ -22,6 +22,12 @@ ish_home: /opt/intershop
 # Url for bootstrap archive
 ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intershop/build/infrastructure/intershop-ci-setup-bootstrap/3.3.0/intershop-ci-setup-bootstrap-3.3.0.zip"
 
+# Url to starterstore set
+ish_starterstore_set: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/2.2.4/zips/a_responsive-zip-src-2.2.4.zip"
+
+# Url to starterstore assembly
+ish_starterstore_assembly: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/inspired-b2c/2.2.4/zips/inspired-b2c-zip-src-2.2.4.zip"
+
 # Directory where to expand the bootstrap (relative to ish_home)
 ish_bootstrap_directory: intershop-ci-setup-bootstrap
 
