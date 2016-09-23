@@ -57,7 +57,7 @@ Role to install the Oracle JDK
 
 == Configuration
 Default values for the roles are configured in _roles\*\defaults\main.yml_
-Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`.
+Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`. +
 NOTE: It is highly recommended to encrypt sensitive data like passwords, user tokens and licenses with Ansible vault. See http://docs.ansible.com/ansible/playbooks_vault.html[Ansible documentation] for details.
 [cols="17%,17%,85%", width="90%, options="header"]
 |===
