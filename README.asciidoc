@@ -20,7 +20,7 @@ This playbook sets up a complete CI environment including:
 * Nexus
 * Jenkins
 * Project setup
-* Initialization of git (gitlab) or SVN (Subverssion) repositories
+* Initialization of git (GitLab) or SVN (Subverssion) repositories
 
 === ishsystem.yml
 This playbook sets up a new host to deploy an Intershop Commerce Management system including:
@@ -35,7 +35,7 @@ This playbook sets up a new host to deploy an Intershop Commerce Management syst
 Role to create project user / groups. This role also:
 * Executes the project-bootstrap tasks
 * Imports the responsive starter store
-* Initialize the SVN repositories, or git-repositories on gitlab-Servere
+* Initialize the SVN repositories, or git-repositories on GitLab server
 
 === ishsetup
 Role to create an environment to execute an Intershop server deployment.
@@ -63,7 +63,7 @@ NOTE: It is highly recommended to encrypt sensitive data like passwords, user to
 |===
 |Name | Sample | Description
 3+| *ROLE CISETUP* / ishsetup
-| *ish_user_sshkey*   | `-----BEGIN RSA PRIVATE KEY ...` | ssh-Key for gitlab pushes
+| *ish_user_sshkey*   | `-----BEGIN RSA PRIVATE KEY ...` | ssh-Key for GitLab pushes
 | *ish_password*      | `$1$...`            | Encrypted password. See http://docs.ansible.com/ansible/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module[Ansible documentation] for details
 | *ish_corporateName* | `com.example`       | Provide a reverse domain name
 | *ish_projectName*   | `corporateshop`     | Provide a name using only letters, numbers and underscores (no spaces or other special characters)
@@ -73,15 +73,15 @@ NOTE: It is highly recommended to encrypt sensitive data like passwords, user to
 | *ish_svn_username* | `myuser`             | Username for SVN access
 | *ish_svn_password* | `password`           | Password for SVN access
 3+| *Git / gitlab-Configuration*
-| *ish_gitlab_token* | `yourtoken`          | Token for gitlab access
-| *ish_gitlab_server_url* | `https://gitlab.example.com` | Gitlab server URL
+| *ish_gitlab_token* | `yourtoken`          | Token for GitLab access
+| *ish_gitlab_server_url* | `https://gitlab.example.com` | GitLab server URL
 | *ish_gitlab_group* | `corporateshop` | Group for the repositories to initialize
-| *ish_git_user_name* | `gituser` | username for git user
-| *ish_git_user_email* | `gituser@example.com` | email for gituser
+| *ish_git_user_name* | `gituser` | username of the git user
+| *ish_git_user_email* | `gituser@example.com` | Email address of the git user
 3+| *ROLE NEXUS*
-| *nexus_ishrepo_url* | `https://repo.intershop.de/content/repository/4711` | Url for access Intershop Repository server
-| *nexus_ishrepo_user* | `usertoken` | usertoken for access Intershop Repository server
-| *nexus_ishrepo_password* | `secret` | password for usertoken
+| *nexus_ishrepo_url* | `https://repo.intershop.de/content/repository/4711` | URL to access Intershop Repository server
+| *nexus_ishrepo_user* | `usertoken` | User token to access Intershop Repository server
+| *nexus_ishrepo_password* | `secret` | Password for the user token
 3+| *ROLE ORACLE-CLIENT*
 | *oracle_client_download_url* | `https://install.example.com/oracle/linuxamd64_12102_client.zip` | Location for Oracle client installation file
 3+| *ROLE ORACLE-SERVER*
