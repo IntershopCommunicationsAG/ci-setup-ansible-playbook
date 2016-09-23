@@ -1,64 +1,64 @@
-= ci setup ansible playbook
+= CI Setup for Ansible Playbook
 :latestRevision: 1.0.0
 :toc:
 
 == Summary
-This ansibles roles are intended to setup a continues integration environment using nexus and jenkins.
+The Ansibles roles, described here, are intended to set up a continues integration environment using Sonatype Nexus and Jenkins.
 
 === Preconditions:
-
 * https://www.centos.org/[CentOS 7] machine
 * Installed http://docs.ansible.com/ansible/intro.html[Ansible]
 * Internet access
 
-== Sample playbooks
+== Sample Playbooks
 
 === setupci.yml
-This playbook setup a complete ci environment including
-
+This playbook sets up a complete CI environment including:
 * Oracle Java JDK
 * Oracle Server
 * Oracle Client
 * Nexus
 * Jenkins
-* project setup
-* Initialization of git (gitlab) or svn repositories
+* Project setup
+* Initialization of git (gitlab) or SVN (Subverssion) repositories
 
 === ishsystem.yml
-This playbook setup a new host for deploying an intershop system
-
+This playbook sets up a new host to deploy an Intershop Commerce Management system including:
 * Oracle Java JDK
 * Oracle Server
 * Oracle Server
-* User for running deployment and intershop environment
+* User to execute the deployment and to set up the Intershop environment
 
 == Roles
 
 === cisetup
-Role for create project user / groups. This role also execute the project-bootstrap tasks and imports the responsive starter store. SVN repositories or git-repositories on gitlab-Server are initialized by this role
+Role to create project user / groups. This role also:
+* Executes the project-bootstrap tasks
+* Imports the responsive starter store
+* Initialize the SVN repositories, or git-repositories on gitlab-Servere
 
 === ishsetup
-Role for creating an environment to execute an intershop server deployment.
+Role to create an environment to execute an Intershop server deployment.
 
 === jenkins
-Role for installing Jenkins. For now there is no configuration of Jenkins included.
+Role to install Jenkins. Currently there is no configuration for Jenkins included.
 
 === nexus
-Role for installing and configuring nexus. All needed repositories and proxy-repositories are created by this role.
+Role to install and configure the Nexus. All required repositories and proxy-repositories are created by this role.
 
 === oracle-client
-Installs Oracle Client. For now this role was only tested with Oracle 12.1.0.2
+Installs Oracle Client. Currently this role is only tested with Oracle 12.1.0.2.
 
 === oracle-server
-Installs Oracle Server. For new this role was only tested with Oracle 12.1.0.2 (EE)
+Installs Oracle Server. Currently this role was only tested with Oracle 12.1.0.2 (EE).
 
 === oraclejdk
-Role for installing Oracle JDK
+Role to install the Oracle JDK
 
 == Configuration
-
-Default values for the roles are configured in `roles\*\defaults\main.yml`
-Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`. *It is highly recommended to encrypt sensitive data like passwords, user tokens and licenses with Ansible vault. See http://docs.ansible.com/ansible/playbooks_vault.html[Ansible documentation] for details
+Default values for the roles are configured in _roles\*\defaults\main.yml_
+Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`.
+NOTE: It is highly recommended to encrypt sensitive data like passwords, user tokens and licenses with Ansible vault. See http://docs.ansible.com/ansible/playbooks_vault.html[Ansible documentation] for details.
 [cols="17%,17%,85%", width="90%, options="header"]
 |===
 |Name | Sample | Description
