@@ -73,7 +73,7 @@ NOTE: It is highly recommended to encrypt sensitive data like passwords, user to
 | *ish_projectName*   | `corporateshop`     | Provide a name using only letters, numbers and underscores (no spaces or other special characters)
 | *ish_license*       | `<?xml version ...` | Provide the contents of your Intershop License File
 3+| *SVN-Configuration*
-| *ish_svn_baseurl* | \`https://svn.example.com/svn/myproject/source`| SVN Base URL
+| *ish_svn_baseurl* | `\https://svn.example.com/svn/myproject/source`| SVN Base URL
 | *ish_svn_username* | `myuser`             | Username for SVN access
 | *ish_svn_password* | `password`           | Password for SVN access
 3+| *Git / gitlab-Configuration*
