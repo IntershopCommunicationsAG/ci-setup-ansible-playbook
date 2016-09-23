@@ -80,7 +80,7 @@ NOTE: It is highly recommended to encrypt sensitive data like passwords, user to
 | *ish_gitlab_token* | `yourtoken`          | Token for GitLab access
 | *ish_gitlab_server_url* | `\https://gitlab.example.com` | GitLab server URL
 | *ish_gitlab_group* | `corporateshop` | Group for the repositories to initialize
-| *ish_git_user_name* | `gituser` | username of the git user
+| *ish_git_user_name* | `gituser` | User name of the git user
 | *ish_git_user_email* | `gituser@example.com` | Email address of the git user
 3+| *ROLE NEXUS*
 | *nexus_ishrepo_url* | `\https://repo.intershop.de/content/repository/4711` | URL to access Intershop Repository server
