@@ -89,8 +89,8 @@ NOTE: It is highly recommended to encrypt sensitive data like passwords, user to
 3+| *ROLE ORACLE-CLIENT*
 | *oracle_client_download_url* | \`https://install.example.com/oracle/linuxamd64_12102_client.zip` | Location for Oracle client installation file
 3+| *ROLE ORACLE-SERVER*
-| *oracle_server_download_files* | `- \https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip +
-\https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip` | Location for Oracle server installation files
+| *oracle_server_download_files* | \`https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip` +
+\`https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip` | Location for Oracle server installation files
 |===
 
 For more information please see
