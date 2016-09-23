@@ -14,6 +14,7 @@ The Ansibles roles, described here, are intended to set up a continues integrati
 
 === setupci.yml
 This playbook sets up a complete CI environment including:
+
 * Oracle Java JDK
 * Oracle Server
 * Oracle Client
@@ -24,6 +25,7 @@ This playbook sets up a complete CI environment including:
 
 === ishsystem.yml
 This playbook sets up a new host to deploy an Intershop Commerce Management system including:
+
 * Oracle Java JDK
 * Oracle Server
 * Oracle Server
@@ -33,6 +35,7 @@ This playbook sets up a new host to deploy an Intershop Commerce Management syst
 
 === cisetup
 Role to create project user / groups. This role also:
+
 * Executes the project-bootstrap tasks
 * Imports the responsive starter store
 * Initialize the SVN repositories, or git-repositories on GitLab server
@@ -57,7 +60,8 @@ Role to install the Oracle JDK
 
 == Configuration
 Default values for the roles are configured in _roles\*\defaults\main.yml_
-Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`. +
+Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`.
+
 NOTE: It is highly recommended to encrypt sensitive data like passwords, user tokens and licenses with Ansible vault. See http://docs.ansible.com/ansible/playbooks_vault.html[Ansible documentation] for details.
 [cols="17%,17%,85%", width="90%, options="header"]
 |===
