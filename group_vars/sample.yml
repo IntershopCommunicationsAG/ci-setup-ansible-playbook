@@ -1,0 +1,79 @@
+# ROLE CISETUP / ishsetup
+##########################
+
+# ssh-Key for gitlab pushes
+
+ish_user_sshkey: |
+  -----BEGIN RSA PRIVATE KEY ...
+
+# Encrypted password for ish_user. See http://docs.ansible.com/ansible/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module for details
+ish_password:
+
+# Provide a reverse domain name
+ish_corporateName: com.example
+
+# Provide a name using only letters, numbers and underscores (no spaces or other special characters)
+ish_projectName: corporateshop
+
+# Provide the contents of your Intershop License File
+ish_license: |
+  <?xml version ...
+
+# vcs: Possible values git/svn
+ish_vcs: git
+
+# SVN-Configuration
+####################
+
+# SVN Base URL
+ish_svn_baseurl: https://svn.example.com/svn/myproject/source
+
+# Username for SVN access
+ish_svn_username:
+
+# Password for SVN access
+ish_svn_password: password          |
+
+# Git / gitlab-Configuration
+#############################
+
+#Token for gitlab access
+ish_gitlab_token:
+
+# Gitlab server URL
+ish_gitlab_server_url:
+
+# Group for the repositories to initialize
+ish_gitlab_group:
+
+# username for git user
+ish_git_user_name:
+
+# email for gituser
+ish_git_user_email:
+
+# ROLE NEXUS
+#############
+
+# Url for access Intershop Repository server
+nexus_ishrepo_url: https://repo.intershop.de/content/repository/4711
+
+# usertoken for access Intershop Repository server
+nexus_ishrepo_user:
+
+# password for usertoken
+nexus_ishrepo_password:
+
+# ROLE ORACLE-CLIENT
+#####################
+
+# Location for Oracle client installation file
+oracle_client_download_url: https://install.example.com/oracle/linuxamd64_12102_client.zip
+
+# ROLE ORACLE-SERVER
+#####################
+
+# Location for Oracle server installation files
+oracle_server_download_files:
+  - https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip
+  - https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip
