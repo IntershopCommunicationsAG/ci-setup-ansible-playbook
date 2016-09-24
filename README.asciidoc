@@ -10,6 +10,19 @@ The Ansibles roles, described here, are intended to set up a continues integrati
 * Installed http://docs.ansible.com/ansible/intro.html[Ansible]
 * Internet access
 
+== Quick installation guide
+
+```
+# Install ansible
+yum -y install epel-release
+yum -y install ansible
+# copy contents of this repository to /etc/ansible
+# cp host_vars/sample.yml host_vars/<yourhost>.yml and configure values. For Details see Configuration
+# run ansible playbook
+ansible-playbook setupci.yml
+```
+
+
 == Sample Playbooks
 
 === setupci.yml
@@ -63,6 +76,7 @@ Default values for the roles are configured in _roles\*\defaults\main.yml_
 Commented values needs to be set. Unconfigured commented values needs to be defined in `host_vars` or `group_vars`.
 
 NOTE: It is highly recommended to encrypt sensitive data like passwords, user tokens and licenses with Ansible vault. See http://docs.ansible.com/ansible/playbooks_vault.html[Ansible documentation] for details.
+Use group_vars/sample.yaml as a start-point.
 [cols="17%,17%,85%", width="90%, options="header"]
 |===
 |Name | Sample | Description

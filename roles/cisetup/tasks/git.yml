@@ -1,13 +1,4 @@
 ---
-# !!! nbuild has no access via login_token: Workaround create group and grant owner access to nbuild. !!!
-#- name: create gitlab group
-#  local_action: gitlab_group
-#                login_token={{ish_gitlab_login_token}}
-#                server_url={{ish_gitlab_server_url}}
-#                name={{ish_gitlab_group}}
-#                path={{ish_gitlab_group}}
-#                validate_certs=true
-#                state=present
 - name: set git facts
   set_fact:
     gitlab_servername: "{{ish_gitlab_server_url|regex_replace('^.*?://(.*?)', '\\1')}}"
@@ -16,11 +7,13 @@
 
 - name: install git-svn
   yum: name=git-svn state=present
-  
+
+- name: install pyapi-gitlab
+  shell: easy_install pip && pip install pyapi-gitlab
+
 - name: install .gitconfig
   template: src=item.j2 dest={{ish_home}}/.gitconfig owner={{ish_user}} group={{ish_group}}
   with_items: "{{ish_git_config}}"
-  
 
 - name: get ssh-host-keys
   shell: |

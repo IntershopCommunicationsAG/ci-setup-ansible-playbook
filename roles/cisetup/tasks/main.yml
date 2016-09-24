@@ -79,7 +79,7 @@
   shell: cd {{item.directory}} && mv {{item.arcname}}/* . && mv {{item.arcname}}/.* . ; rmdir {{item.arcname}}
   with_items:
     - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_componentSetName}}", arcname: a_responsive}
-    - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_assemblyName}}", arcname: inspired-b2x}
+    - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_assemblyName}}", arcname: 'inspired-b2?'}
   become: yes
   become_user: "{{ish_user}}"
   

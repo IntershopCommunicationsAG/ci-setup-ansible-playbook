@@ -19,6 +19,9 @@ ish_groups: dba
 # home directory for ish_user
 ish_home: /opt/intershop
 
+# Project version
+ish_version: 1.0.0
+
 # Url for bootstrap archive
 ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intershop/build/infrastructure/intershop-ci-setup-bootstrap/3.3.0/intershop-ci-setup-bootstrap-3.3.0.zip"
 
@@ -38,13 +41,13 @@ ish_setupDirectory: '{{ish_home}}/ci-source'
 ish_hostName: '{{ansible_hostname}}'
 
 # repoBaseURL for ci-configuration
-ish_repoBaseURL: 'http://{{ansible_fqdn}}:8081/nexus/content'
+ish_repoBaseURL: http://{{ansible_fqdn}}:8081/nexus/content
 
 # assemblyName for ci-configuration
-ish_assemblyName: 'assembly'
+ish_assemblyName: assembly
 
 # componentSetName for ci-configuration
-ish_componentSetName: 'componentSet'
+ish_componentSetName: componentSet
 
 # corporateName for ci-configuration
 #ish_corporateName:
