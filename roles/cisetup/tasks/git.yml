@@ -21,6 +21,8 @@
     mv .ssh/known_hosts .ssh/known_hosts_tmp
     cat .ssh/known_hosts_tmp | sort -u > .ssh/known_hosts
     rm .ssh/known_hosts_tmp
+  args:
+    chdir: "{{ish_home}}"
   become: yes
   become_user: "{{ish_user}}"
 
