@@ -10,7 +10,10 @@
 
 - name: open firewall jenkins
   firewalld: port=8080/tcp permanent=true state=enabled immediate=yes
-  
+
+- name: wait for service start
+  wait_for: port=8080 host={{ansible_hostname}} timeout=60
+
 - name: get initial password
   shell: cat /var/lib/jenkins/secrets/initialAdminPassword
   register: initialPwd
