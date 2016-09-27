@@ -12,12 +12,12 @@ The Ansibles roles, described here, are intended to set up a continues integrati
 
 == Quick Installation Guide
 
-. Install Ansible.+
-`yum -y install epel-release`+
+. Install Ansible. +
+`yum -y install epel-release` +
 `yum -y install ansible`
 . Copy the contents of this repository to _/etc/ansible_.
 . Copy _host_vars/sample.yml_ to _host_vars/<yourhost>.yml_ and configure the values. For details see section <<Configuration>>.
-. Run the Ansible playbook+
+. Run the Ansible playbook +
 `ansible-playbook setupci.yml`
 
 == Sample Playbooks
