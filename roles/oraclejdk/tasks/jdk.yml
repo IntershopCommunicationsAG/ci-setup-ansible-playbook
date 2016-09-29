@@ -7,3 +7,12 @@
 
 - name: remove installation file
   file: dest=/tmp/{{jdk_download_url|basename}} state=absent
+
+- name: download JCE
+  get_url: url={{jce_download_url}} headers='Cookie:gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie' dest=/tmp/{{jce_download_url|basename}}
+
+- name: extract JCE
+  unarchive: src=/tmp/{{jce_download_url|basename}} dest=/tmp copy=no
+
+- name: install JCE
+  shell: mv /tmp/UnlimitedJCEPolicyJDK8/* /usr/java/latest/jre/lib/security/
