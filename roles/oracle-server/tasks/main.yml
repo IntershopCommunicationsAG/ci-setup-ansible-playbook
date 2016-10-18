@@ -49,6 +49,14 @@
   service: name=oracledb.service enabled=yes state=started
   register: servicestart
 
+# https://docs.oracle.com/database/121/UNXAR/strt_stp.htm#UNXAR150
+- name: create auto start-stop script
+  template: src=dbora.j2 dest=/etc/init.d/dbora owner={{oracle_user}} group=dba mode="750"
+- name: create symbolic for run-level
+  file: src=/etc/init.d/dbora dest=/etc/rc.d/rc0.d/K01dbora state=link
+- file: src=/etc/init.d/dbora dest=/etc/rc.d/rc3.d/S99dbora state=link
+- file: src=/etc/init.d/dbora dest=/etc/rc.d/rc5.d/S99dbora state=link
+ 
 - name: open firewall
   firewalld: port=1521/tcp permanent=true state=enabled immediate=yes
 
