@@ -12,4 +12,4 @@ oracle_group: oinstall
 oracle_base: /opt/oracle
 
 # oracle client home
-oracle_client_home: "{{ oracle_base }}/product/11.2.0/client_1"
+oracle_client_home: "{{ oracle_base }}/product/12.1.0/client_1"

@@ -14,7 +14,7 @@ oracle_group: oinstall
 oracle_base: /opt/oracle
 
 # Oracle server home
-oracle_server_home: "{{ oracle_base }}/product/11.2.0/dbhome_1"
+oracle_server_home: "{{ oracle_base }}/product/12.1.0/dbhome_1"
 
 # Admmin password (sys, system)
 oracle_password: intershop
