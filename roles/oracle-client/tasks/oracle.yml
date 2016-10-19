@@ -57,9 +57,14 @@
   register: client_install
   failed_when: "'{{ success_message }}' not in client_install.stdout"
 
+- name: check update {{oracle_inventory_script}}
+  stat: path="{{oracle_inventory_script}}"
+  register: checkUpdateInventory
+  ignore_errors: true
+  
 - name: update Oracle inventory
   command: "{{ oracle_inventory_script }}"
-  when: "{{client_install.changed}}"
+  when: client_install.changed and checkUpdateInventory.stat.exists
 
 - name: remove Oracle client installation directory
   file: path="{{ installer_dir }}" state=absent

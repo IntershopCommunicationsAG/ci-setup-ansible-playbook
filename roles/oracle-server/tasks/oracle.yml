@@ -77,8 +77,14 @@
   register: server_install
   failed_when: "'{{ success_message }}' not in server_install.stdout"
 
+- name: check update {{oracle_inventory_script}}
+  stat: path="{{oracle_inventory_script}}"
+  register: checkUpdateInventory
+  ignore_errors: true
+  
 - name: update Oracle inventory
   command: "{{ oracle_inventory_script }}"
+  when: checkUpdateInventory.stat.exists
   
 - name: execute root script
   command: "{{ oracle_server_home}}/root.sh"
