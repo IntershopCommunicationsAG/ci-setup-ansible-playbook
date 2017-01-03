@@ -1,2 +1,4 @@
 .vagrant
 host_vars/
+*.iml
+.idea/
