@@ -11,7 +11,14 @@
 - name: install subversion
   yum: name=subversion state=present
 
+- name: write ignore.txt
+  template: src=item.j2 dest={{ish_home}}/ignore.txt owner={{ish_user}} group={{ish_group}}
+  with_items:
+    - "{{ish_svn_ignore_txt}}"
+
 - name: create svndirectories
   include: svnrepo.yml
   with_items:
     - "{{ish_repos}}"
+  loop_control:
+    loop_var: outer_item

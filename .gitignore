@@ -2,3 +2,5 @@
 host_vars/
 *.iml
 .idea/
+install/
+*.retry

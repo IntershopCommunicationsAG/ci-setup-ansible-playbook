@@ -6,7 +6,7 @@
 The Ansibles roles, described here, are intended to set up a continues integration environment using Sonatype Nexus and Jenkins.
 
 === Preconditions:
-* https://www.centos.org/[CentOS 7] machine
+* https://www.centos.org/[CentOS 7] machine or https://www.vagrantup.com/[Vagrant]
 * Installed http://docs.ansible.com/ansible/intro.html[Ansible]
 * Internet access
 
@@ -29,9 +29,10 @@ This playbook sets up a complete CI environment including:
 * Oracle Server
 * Oracle Client
 * Nexus
-* Jenkins
+* (Jenkins)
 * Project setup
 * Initialization of git (GitLab) or SVN (Subverssion) repositories
+* gitlab-runner
 
 === ishsystem.yml
 This playbook sets up a new host to deploy an Intershop Commerce Management system including:
@@ -49,6 +50,7 @@ Role to create project user / groups. This role also:
 * Executes the project-bootstrap tasks
 * Imports the responsive starter store
 * Initialize the SVN repositories, or git-repositories on GitLab server
+* gitlab-runner setup
 
 === ishsetup
 Role to create an environment to execute an Intershop server deployment.
@@ -104,9 +106,21 @@ Use group_vars/sample.yaml as a start-point.
 `\https://install.example.com/oracle/linuxamd64_12102_database_1of2.zip` | Location for Oracle server installation files
 |===
 
+== Register gitlab-runner
+
+For using gitlab-runner just get your token on your gitlab-site (project corporate-distribution) and register it using
+
+`sudo gitlab-runner register -n -r <GITLAB_RUNNER_TOKEN> -u <GITLAB_URL>/ci --executor shell`
+
+Afterwards enable your Runner for the projects
+
+* oracleDriver
+* hostConfigs
+* <ish_projectName>
+
 For more information please see
 
-* https://support.intershop.com/kb/index.php/Display/X27327[Cookbook - Setup CI Infrastructure (valid to Gradle Tools 2.7)]
+* https://support.intershop.com/kb/index.php/Display/279D85[Cookbook - Setup CI Infrastructure]
 
 == License
 

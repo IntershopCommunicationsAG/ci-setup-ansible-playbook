@@ -25,14 +25,14 @@ ish_version: 1.0.0
 # Url for bootstrap archive
 ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intershop/build/infrastructure/intershop-ci-setup-bootstrap/3.3.0/intershop-ci-setup-bootstrap-3.3.0.zip"
 
-# Url to starterstore set
-ish_starterstore_set: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/2.2.4/zips/a_responsive-zip-src-2.2.4.zip"
+# GIT URL for intershop-cisetup-template
+ish_intershop_cisetup_template: https://github.com/IntershopCommunicationsAG/intershop-cisetup-template
 
-# Url to starterstore assembly
-ish_starterstore_assembly: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/inspired-b2c/2.2.4/zips/inspired-b2c-zip-src-2.2.4.zip"
+# Url to starterstore
+ish_starterstore: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/3.0.0/zips/a_responsive-zip-src-3.0.0.zip"
 
 # Directory where to expand the bootstrap (relative to ish_home)
-ish_bootstrap_directory: intershop-ci-setup-bootstrap
+ish_bootstrap_directory: "{{ish_intershop_cisetup_template | basename}}"
 
 # setupDirectory for ci-configuration
 ish_setupDirectory: '{{ish_home}}/ci-source'
@@ -42,12 +42,6 @@ ish_hostName: '{{ansible_hostname}}'
 
 # repoBaseURL for ci-configuration
 ish_repoBaseURL: http://{{ansible_fqdn}}:8081/nexus/content
-
-# assemblyName for ci-configuration
-ish_assemblyName: assembly
-
-# componentSetName for ci-configuration
-ish_componentSetName: componentSet
 
 # corporateName for ci-configuration
 #ish_corporateName:
@@ -74,31 +68,110 @@ ish_vcs: git
 # arguments for svn
 ish_svn_args: --username={{ish_svn_username}} --password={{ish_svn_password}} --no-auth-cache --non-interactive
 
+ish_svn_ignore_txt: |
+  build
+  .gradle
+  bin
+  target
+
+ish_gitattributes: |
+  * text eol=lf
+
+  *.png binary
+  *.jpg binary
+  *.jar binary
+  *.woff binary
+  *.ttf binary
+  *.pdf binary
+
+gcipublishdefault: |
+  before_script:
+    - chmod +x gradlew
+  build:
+    stage: build
+    script:
+      - source ~/secrets
+      - sh ./gradlew clean publish
+    allow_failure: false
+
+gcipublishoracle: |
+  before_script:
+    - chmod +x gradlew
+  build:
+    stage: build
+    script:
+      - source ~/secrets
+      - sh ./gradlew publish
+    allow_failure: false
+
+gcionlycheckout: |
+  build:
+    stage: build
+    script:
+      - echo "Only checkout"
+
+gciproject: |
+  before_script:
+    - chmod +x gradlew
+  snapshot_build:
+    stage: build
+    script:
+      - source ~/secrets
+      - export RUNONCI=true
+      - export SNAPSHOTURL={{ish_repoBaseURL}}/repositories/snapshots
+      - export ENVIRONMENT_PROPS=$(pwd)/../{{ish_hostconfig_repo}}/ciserver/environment.properties
+      - sh ./gradlew clean dbinit check publish -PbuildEnvironmentProperties=$ENVIRONMENT_PROPS -PtestEnvironmentProperties=$ENVIRONMENT_PROPS --refresh-dependencies -s
+    when: manual
+    except:
+      - /RELEASE*/
+
+  release_build:
+    stage: build
+    script:
+      - source ~/secrets
+      - export RUNONCI=true
+      - export RELEASEURL={{ish_repoBaseURL}}/repositories/releases
+      - export ENVIRONMENT_PROPS=$(pwd)/../{{ish_hostconfig_repo}}/ciserver/environment.properties
+      - sh ./gradlew clean dbinit check publish -PreleaseWithDump=true -PbuildEnvironmentProperties=$ENVIRONMENT_PROPS -PtestEnvironmentProperties=$ENVIRONMENT_PROPS --refresh-dependencies -s
+    only:
+      - /RELEASE*/
+
+# repo for host_configs
+ish_hostconfig_repo: host-configs
+
+ish_initialVersion: 1.0.0
 
 # create repositories
 ish_repos:
-  - { src: '{{ish_home}}/{{ish_bootstrap_directory}}', repo: '{{ish_svn_baseurl}}/devops/{{ish_bootstrap_directory}}' }
-  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-distribution', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-distribution' }
-  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-plugins', repo: '{{ish_svn_baseurl}}/devops/gradle/corporate-plugins' }
-  - { src: '{{ish_setupDirectory}}/projects/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/projects/{{ish_projectName}}' }
-  - { src: '{{ish_setupDirectory}}/projects/oracleDriver', repo: '{{ish_svn_baseurl}}/projects/oracleDriver/p_oracle' }
-  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', repo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}' }
-  - { src: '{{ish_setupDirectory}}/devops/ci_server/user_home', repo: '{{ish_svn_baseurl}}/devops/ci_server/user_home' }
-  - { src: '{{ish_setupDirectory}}/devops/ci_server/host_configs', repo: '{{ish_svn_baseurl}}/devops/ci_server/host_configs' }
+  - { src: '{{ish_home}}/{{ish_bootstrap_directory}}', svnrepo: '{{ish_svn_baseurl}}/devops/{{ish_bootstrap_directory}}', gitrepo: '{{ish_bootstrap_directory}}', gitlabci: '', gitignore: '{{ish_gitignore}}' }
+  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', svnrepo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}', gitrepo: 'demo-deployments', gitlabci: '', gitignore: '{{ish_gitignore}}'  }
+  - { src: '{{ish_setupDirectory}}/projects/{{ish_projectName}}', svnrepo: '{{ish_svn_baseurl}}/projects/{{ish_projectName}}', gitrepo: '{{ish_projectName}}', gitlabci: '{{gciproject}}', gitignore: '{{ish_gitignore_prj}}' }
+  - { src: '{{ish_setupDirectory}}/devops/ci_server/host_configs', svnrepo: '{{ish_svn_baseurl}}/devops/ci_server/host_configs', gitrepo: '{{ish_hostconfig_repo}}', gitlabci: '{{gcionlycheckout}}', gitignore: '{{ish_gitignore}}' }
+  - { src: '{{ish_setupDirectory}}/projects/oracleDriver/3rd_oracle', svnrepo: '{{ish_svn_baseurl}}/projects/oracleDriver/3rd_oracle', gitrepo: 'oracle-driver', gitlabci: '{{gcipublishoracle}}', gitignore: '{{ish_gitignore_orcl}}' }
+  - { src: '{{ish_setupDirectory}}/devops/gradle/corporate-distribution', svnrepo: '{{ish_svn_baseurl}}/devops/gradle/corporate-distribution', gitrepo: 'corporate-distribution', gitlabci: '{{gcipublishdefault}}', gitignore: '{{ish_gitignore}}' }
 
 # configure build.gradle
 ish_content_changes:
-  - {dest: "{{ish_componentSetName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
-  - {dest: "{{ish_componentSetName}}/.project", regexp: "(<projectDescription>\\v*\\s*<name>).*(</name>)", replace: "\\g<1>{{ish_componentSetName}}\\g<2>" }
-  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
-  - {dest: "{{ish_componentSetName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
-  - {dest: "{{ish_componentSetName}}/gradle.properties", regexp: "(\\s*version\\s*=\\s*).*", replace: "\\g<1>{{ish_version}}" }
-  - {dest: "{{ish_assemblyName}}/settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_assemblyName}}\\g<2>" }
-  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
-  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "(Cartridges.collect \\{\").*({{':'}}\\$it\"\\})", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
-  - {dest: "{{ish_assemblyName}}/build.gradle", regexp: "^\\s*repositories\\s*\\{\\v*\\s*maven\\s*\\{\\v*\\s*url.*?\\v*\\s*\\}\\v*\\s*\\}\\v*", replace: "" }
-  - {dest: "{{ish_assemblyName}}/gradle.properties", regexp: "(# componentsets with the same live cycle\\v*\\s*filter).*$", replace: "\\g<1>.{{ish_corporateName}}.{{ish_componentSetName}} = {{ish_version}}%suffix%" }
-  
+  - {dest: "settings.gradle", regexp: "(rootProject.name\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_projectName}}\\g<2>" }
+  - {dest: "build.gradle", regexp: "(\\s*group\\s*=\\s*\\').*(\\')", replace: "\\g<1>{{ish_corporateName}}\\g<2>" }
+  - {dest: "build.gradle", regexp: "(apply plugin: 'com.intershop.gradle.nexuspublish-configuration')", replace: "//\\g<1>"}
+  - {dest: "build.gradle", regexp: "//(apply plugin: 'com.intershop.gradle.simplepublish-configuration')", replace: "\\g<1>"}
+  - {dest: "build.gradle", regexp: "(.*def assemblyProjects = \\[\\s*).*(\\s*\\])", replace: "\\g<1>project(':assembly_{{ish_projectName}}')\\g<2>"}
+  - {dest: "build.gradle", regexp: ".*if\\(name == 'inspired-b2c'.*(\\s.*){4}\\}\\s", replace: ""}
+  - {dest: "build.gradle", regexp: "(.*if\\(name == ').*(')", replace: "\\g<1>assembly_{{ish_projectName}}\\g<2>"}
+  - {dest: "build.gradle", regexp: "(.*initialVersion.*').*('.*)", replace: "\\g<1>{{ish_initialVersion}}\\g<2>"}
+  - {dest: "gradle.properties", regexp: "(version.com.intershop.assembly.commerce_management_b2c = 7.8.0.0)", replace: "//\\g<1>"}
+  - {dest: "assembly_{{ish_projectName}}/build.gradle", regexp: "(.*)github.com/paladox/phantomjs/releases/download/2.1.7(.*)", replace: "\\g<1>bitbucket.org/ariya/phantomjs/downloads\\g<2>"}
+
+ish_hostconfig_changes:
+  - {regexp: "(environment = ).*", replace: "\\g<1>test"}
+  - {regexp: "databaseSid = .*", replace: "databaseServiceName = {{oracle_service}}"}
+  - {regexp: "(oracleClientDir = ).*", replace: "\\g<1>{{oracle_client_home}}"}
+  - {regexp: "(user = ).*", replace: "\\g<1>gitlab-runner"}
+  - {regexp: "(userGroup = ).*", replace: "\\g<1>gitlab-runner"}
+  - {regexp: "(multicastIPSuffix = ).*", replace: "\\g<1>{{ish_multicastIPSuffix}}"}
+  - {regexp: "(multicastPort = ).*", replace: "\\g<1>{{ish_multicastPort}}"}
+
 # Login token for gitlab
 #ish_gitlab_token:
 
@@ -114,6 +187,74 @@ ish_content_changes:
 # git user email
 #ish_git_user_email:
 
+ish_gitignore: |
+  # IntelliJ project files
+  .idea
+  *.iml
+  out
+  gen
+  *.bak
+  *.log
+
+  # Eclipse project files
+  **/bin/
+  **/.settings/
+  **/.classpath
+  **/.project
+
+  # editor backup files
+  **~
+
+  # Gradle Files
+  **/build/
+  **/.gradle
+
+  # Intershop build directories
+  **/target/
+  # Ignore Gradle GUI config
+  gradle-app.setting
+
+  # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+  !gradle-wrapper.jar
+
+ish_gitignore_prj: |
+  {{ish_gitignore}}
+
+  # generated css
+  app_sf_responsive*/staticfiles/cartridge/static/default/css/themes.css
+  app_sf_responsive*/staticfiles/cartridge/static/default/css/themes.css.map
+  app_sf_responsive*/staticfiles/cartridge/static/default/css/
+
+ish_gitignore_orcl: |
+  # IntelliJ project files
+  .idea
+  *.iml
+  out
+  gen
+  *.bak
+  *.log
+
+  # Eclipse project files
+  **/bin/
+  **/.settings/
+  **/.classpath
+  **/.project
+
+  # editor backup files
+  **~
+
+  # Gradle Files
+  **/.gradle
+
+  # Intershop build directories
+  **/target/
+  # Ignore Gradle GUI config
+  gradle-app.setting
+
+  # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+  !gradle-wrapper.jar
+
+
 # git config
 ish_git_config: |
   [user]
@@ -126,8 +267,27 @@ ish_git_config: |
   [pull]
           rebase = true
 
+# Multicast-Settings
+ish_multicastIPSuffix: 23.45
+ish_multicastPort: 50005
+
 # oracle base
 oracle_base: /opt/oracle
 
+# oracle service
+oracle_service: isdb1
+
 # oracle client home
 oracle_client_home: "{{ oracle_base }}/product/12.1.0/client_1"
+
+# install gitlab-runner
+ish_gitlab_runner_install: true
+
+# gitlab-runner secrets
+gitlabrunner_secrets: |
+  export REPO_USER_NAME=deployment
+  export REPO_USER_PASSWD={{nexus_deployment_password}}
+  export JAVA_HOME=/usr/java/latest
+
+# nexus deployment password
+nexus_deployment_password: deployment123

@@ -52,17 +52,11 @@
 - name: Create jcenter repository
   uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"proxy","id":"jcenter","name":"JCenter","browseable":true,"indexable":true,"notFoundCacheTTL":1440,"artifactMaxAge":-1,"metadataMaxAge":1440,"itemMaxAge":1440,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","downloadRemoteIndexes":true,"autoBlockActive":true,"fileTypeValidation":true,"exposed":true,"checksumPolicy":"WARN","remoteStorage":{"remoteStorageUrl":"https://jcenter.bintray.com/","authentication":null,"connectionSettings":null}}}
   
-- name: Create gradle repository
-  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"hosted","id":"gradle","name":"Gradle","writePolicy":"ALLOW_WRITE_ONCE","browseable":true,"indexable":true,"exposed":true,"notFoundCacheTTL":0,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","defaultLocalStorageUrl":"file:/opt/sonatype-nexus/sonatype-work/nexus/storage/gradle/","downloadRemoteIndexes":false,"checksumPolicy":"IGNORE"}}
-
 - name: Create distributions repository
   uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repositories method=POST body_format=json status_code=201 body={"data":{"repoType":"hosted","id":"distributions","name":"Distributions","writePolicy":"ALLOW_WRITE_ONCE","browseable":true,"indexable":true,"exposed":true,"notFoundCacheTTL":0,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","defaultLocalStorageUrl":"file:/opt/sonatype-nexus/sonatype-work/nexus/storage/distributions/","downloadRemoteIndexes":false,"checksumPolicy":"IGNORE"}}
   
 - name: Create components group
-  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repo_groups method=POST body_format=json status_code=201 body={"data":{"id":"components","name":"Components","format":"maven2","exposed":true,"provider":"maven2","repositories":[{"id":"ishrepo"},{"id":"releases"},{"id":"gradle"}]}}
-  
-- name: Create mavenall group
-  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repo_groups method=POST body_format=json status_code=201 body={"data":{"id":"mavenall","name":"Maven all","format":"maven2","exposed":true,"provider":"maven2","repositories":[{"id":"jcenter"},{"id":"central"},{"id":"ishrepo"}]}}
+  uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/repo_groups method=POST body_format=json status_code=201 body={"data":{"id":"components","name":"Components","format":"maven2","exposed":true,"provider":"maven2","repositories":[{"id":"jcenter"},{"id":"ishrepo"},{"id":"releases"},{"id":"central"}]}}
   
 - name: Delete unused repositories/groups
   uri: user=admin password={{nexus_admin_password}} force_basic_auth=true url=http://localhost:8081/nexus/service/local/{{item}} method=DELETE status_code=204,404

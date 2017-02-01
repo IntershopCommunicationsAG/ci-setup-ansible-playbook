@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  roles:
+    #- oraclejdk
+    #- oracle-client
+    #- oracle-server
+    #- ishsetup
+    - nexus
+    - devsetup

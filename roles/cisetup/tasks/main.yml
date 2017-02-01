@@ -1,6 +1,9 @@
 ---
 - name: create intershop user
   user: name={{ish_user}} groups={{ish_groups}} home={{ish_home}} password={{ish_password}}
+
+- name: change permissions
+  file: name={{ish_home}} mode=0755 state=directory
   
 - name: create {{ish_home}}/.ssh
   file: name={{ish_home}}/.ssh state=directory owner={{ish_user}} group={{ish_group}}
@@ -9,37 +12,38 @@
   template: src=item.j2 dest={{ish_home}}/.ssh/id_rsa owner={{ish_user}} group={{ish_group}} mode="0600"
   with_items:
     - "{{ish_user_sshkey}}"
+  no_log: True
 
 - name: write authorized_keys
   template: src=item.j2 dest={{ish_home}}/.ssh/authorized_keys owner={{ish_user}} group={{ish_group}}
   with_items:
     - "{{ish_user_authorized_keys}}"
+  no_log: True
+
+- name: install some packages
+  yum: name="{{item}}" state=present
+  with_items:
+    - unzip
+    - git
+    - Xvfb
+    - firefox
   
-- name: install unzip
-  yum: name=unzip state=present
-  
-- name: check bootstrap_directory
-  stat: path={{ish_home}}/{{ish_bootstrap_directory}}
-  register: bsexists
-  
-- name: install bootstrap
-  unarchive: src={{ish_bootstrap_archive_url}} copy=no dest={{ish_home}} owner={{ish_user}} group={{ish_group}}
-  when: bsexists.stat.exists==false
-  
+- name: checkout intershop-cisetup-template
+  git:
+    repo: "{{ish_intershop_cisetup_template}}"
+    dest: "{{ish_home}}/{{ish_bootstrap_directory}}"
+  become: yes
+  become_user: "{{ish_user}}"
+
 - name: adjust build.gradle
-  lineinfile: dest={{ish_home}}/{{ish_bootstrap_directory}}/build.gradle regexp="^(\s*{{item.key}}\s*=\s*)" line="\1'{{item.value}}'" backrefs=yes
+  lineinfile: dest="{{ish_home}}/{{ish_bootstrap_directory}}/build.gradle" regexp="^(\s*{{item.key}}\s*=\s*)" line="\1'{{item.value}}'" backrefs=yes
   with_items:
     - {key: 'setupDirectory', value: '{{ish_setupDirectory}}'}
     - {key: 'corporateName', value: '{{ish_corporateName}}'}
     - {key: 'repoBaseURL', value: '{{ish_repoBaseURL}}'}
     - {key: 'projectName', value: '{{ish_projectName}}'}
-    - {key: 'assemblyName', value: '{{ish_assemblyName}}'}
-    - {key: 'componentSetName', value: '{{ish_componentSetName}}'}
     - {key: 'hostName', value: '{{ish_hostName}}'}
 
-- name: adjust build.gradle mavenall
-  lineinfile: dest={{ish_home}}/{{ish_bootstrap_directory}}/build.gradle regexp="^(\s*url\s*)'" line="\1'{{ish_repoBaseURL}}/groups/mavenall'" backrefs=yes
-        
 - name: generate sources
   shell: sh gradlew intershopCISetupAll
   args:
@@ -48,7 +52,7 @@
   become_user: "{{ish_user}}"
 
 - name: copy oracle files
-  shell: cp {{oracle_client_home}}/{{item}} {{ish_setupDirectory}}/projects/oracleDriver/p_oracle/3rd_oracle/staticfiles/cartridge/lib
+  shell: cp {{oracle_client_home}}/{{item}} {{ish_setupDirectory}}/projects/oracleDriver/3rd_oracle/build/oracleLibs/jars
   become: yes
   become_user: "{{ish_user}}"
   with_items:
@@ -56,33 +60,26 @@
     - opmn/lib/ons.jar
     - ucp/lib/ucp.jar
 
-- name: write ignore.txt  
-  template: src=item.j2 dest={{ish_home}}/ignore.txt owner={{ish_user}} group={{ish_group}}
-  with_items:
-    - |
-        build
-        .gradle
-        bin
-        target
-
 - name: create vcs repositories
   include: "{{ish_vcs}}.yml"
   when: ish_vcs in avail_vcs
-  
-- name: install starter store componentSet
-  unarchive: src={{ish_starterstore_set}} dest={{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_componentSetName}} copy=no owner={{ish_user}} group={{ish_group}}
 
-- name: install starter store assemblyName
-  unarchive: src={{ish_starterstore_assembly}} dest={{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_assemblyName}} copy=no owner={{ish_user}} group={{ish_group}}
-  
-- name: mv contents
-  shell: cd {{item.directory}} && mv {{item.arcname}}/* . && mv {{item.arcname}}/.* . ; rmdir {{item.arcname}}
-  with_items:
-    - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_componentSetName}}", arcname: a_responsive}
-    - {directory: "{{ish_setupDirectory}}/projects/{{ish_projectName}}/{{ish_assemblyName}}", arcname: 'inspired-b2?'}
+- name: download responsive starter store
+  get_url: url={{ish_starterstore}} dest=/tmp/{{ish_starterstore|basename}} timeout=600
+
+- name: install responsive starter store
+  unarchive: src=/tmp/{{ish_starterstore|basename}} dest=/tmp copy=no owner={{ish_user}} group={{ish_group}}
+
+- name: copy contents to project
+  shell: |
+    cp -rf /tmp/a_responsive/* .
+    mv inspired-b2x assembly_{{ish_projectName}}
+    rm -rf inspired-b2c/
+  args:
+    chdir: "{{ish_setupDirectory}}/projects/{{ish_projectName}}"
   become: yes
   become_user: "{{ish_user}}"
-  
+
 - name: change contents responsive starter store
   replace: dest={{ish_setupDirectory}}/projects/{{ish_projectName}}/{{item.dest}} regexp={{item.regexp}} replace={{item.replace}}
   become: yes
@@ -105,9 +102,52 @@
   become_user: "{{ish_user}}"
   when: ish_vcs=='git'
 
+- name: change contents ciserver host config
+  replace: dest={{ish_setupDirectory}}/devops/ci_server/host_configs/ciserver/environment.properties regexp={{item.regexp}} replace={{item.replace}}
+  become: yes
+  become_user: "{{ish_user}}"
+  with_items: "{{ish_hostconfig_changes}}"
+
+- name: add hostconfig files to svn
+  shell: svn add . --force -q && svn ci {{ish_svn_args}} -m "adjust values for ciserver"
+  args:
+    chdir: "{{ish_setupDirectory}}/devops/ci_server/host_configs"
+  become: yes
+  become_user: "{{ish_user}}"
+  when: ish_vcs=='svn'
+
+- name: add hostconfig files to git
+  shell: git add . && git commit -m "adjust values for ciserver" && git push
+  args:
+    chdir: "{{ish_setupDirectory}}/devops/ci_server/host_configs"
+  become: yes
+  become_user: "{{ish_user}}"
+  when: ish_vcs=='git'
+
 - name: add license directory
   file: path={{ish_home}}/license owner={{ish_user}} group={{ish_group}} state=directory
   
 - name: add license.xml
   template: src=item.j2 dest={{ish_home}}/license/license.xml owner={{ish_user}} group={{ish_group}}
   with_items: "{{ish_license}}"
+  no_log: True
+
+- name: install gitlab-runner
+  shell: |
+    curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh | sudo bash
+    yum install -y gitlab-ci-multi-runner
+    echo Register your Runner:
+    echo   sudo gitlab-runner register -n -r \<GITLAB_RUNNER_TOKEN\> -u {{ish_gitlab_server_url}}/ci --executor shell
+  when: ish_vcs=='git' and ish_gitlab_runner_install
+
+- name: write gitlab-runner secrets-file
+  template: src=item.j2 dest=/home/gitlab-runner/secrets
+  with_items: "{{gitlabrunner_secrets}}"
+  become: yes
+  become_user: gitlab-runner
+  when: ish_vcs=='git' and ish_gitlab_runner_install
+
+- name: print gitlab-runner register hint
+  debug:
+    msg: "Register your Runner: sudo gitlab-runner register -n -u {{ish_gitlab_server_url}}/ci --executor shell -r <GITLAB_RUNNER_TOKEN>"
+  when: ish_vcs=='git' and ish_gitlab_runner_install

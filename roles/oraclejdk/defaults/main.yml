@@ -1,9 +1,9 @@
 ---
 # JDK download URL
-jdk_download_url: http://download.oracle.com/otn-pub/java/jdk/8u102-b14/jdk-8u102-linux-x64.rpm
+jdk_download_url: http://download.oracle.com/otn-pub/java/jdk/8u121-b14/jdk-8u121-linux-x64.rpm
 
 # JDK version
-jdk_version: 1.8.0_102
+jdk_version: 1.8.0_121
 
 # Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files 8 Download
 jce_download_url: http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip

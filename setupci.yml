@@ -1,9 +1,10 @@
 ---
-- hosts: localhost
+- hosts: all
+  become: true
   roles:
     - oraclejdk
     - nexus
     - oracle-client
     - oracle-server
     - cisetup
-    - jenkins
+#    - jenkins

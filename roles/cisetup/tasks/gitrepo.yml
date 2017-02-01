@@ -1,9 +1,14 @@
 ---
 - name: set facts
   set_fact: 
-    reponame: "{{item.repo|regex_replace('^.*/(.*?)/(.*?)$', '\\1-\\2')}}"
-    srcdir: "{{item.src}}"
-  
+    reponame: "{{outer_item.gitrepo}}"
+    srcdir: "{{outer_item.src}}"
+    gitlabci: "{{outer_item.gitlabci}}"
+    gitignore: "{{outer_item.gitignore}}"
+
+- debug:
+    msg: "################################## REPONAME: {{reponame}} #####################################################################"
+
 - name: create gitlab project
   local_action: gitlab_project
                 login_token={{ish_gitlab_token}}
@@ -12,9 +17,34 @@
                 name={{reponame}}
                 state=present
 
+- name: write .gitlab-ci.yml
+  template: src=item.j2 dest={{srcdir}}/.gitlab-ci.yml
+  with_items: "{{gitlabci}}"
+  when: gitlabci != '' and ish_gitlab_runner_install
+  become: yes
+  become_user: "{{ish_user}}"
+  no_log: True
+
+- name: write .gitattributes
+  template: src=item.j2 dest={{srcdir}}/.gitattributes
+  with_items: "{{ish_gitattributes}}"
+  become: yes
+  become_user: "{{ish_user}}"
+  no_log: True
+
+- name: write .gitignore
+  template: src=item.j2 dest={{srcdir}}/.gitignore
+  with_items: "{{gitignore}}"
+  become: yes
+  become_user: "{{ish_user}}"
+  no_log: True
+
+
+- name: force reinitialization
+  file: dest={{srcdir}}/.git state=absent
+
 - name: initialize gitlab
   shell: |
-    cp ~/ignore.txt .gitignore
     git init
     git remote add origin git@{{gitlab_servername}}:{{ish_gitlab_group}}/{{reponame}}.git
     git add .

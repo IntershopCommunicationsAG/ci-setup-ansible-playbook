@@ -1,8 +1,8 @@
 ---
 - name: set facts
   set_fact: 
-    repourl: "{{item.repo}}"
-    srcdir: "{{item.src}}"
+    repourl: "{{outer_item.svnrepo}}"
+    srcdir: "{{outer_item.src}}"
   
 - name: create svn directories
   shell: |

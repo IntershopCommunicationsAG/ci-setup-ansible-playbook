@@ -1,6 +1,11 @@
 ---
 - name: download JDK
   get_url: url={{jdk_download_url}} headers='Cookie:gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie' dest=/tmp/{{jdk_download_url|basename}}
+  when: jdk_download_url | match('http://.*')
+
+- name: link jdk
+  file: src={{jdk_download_url}} dest=/tmp/{{jdk_download_url|basename}} state=link
+  when: jdk_download_url | match('/.*')
   
 - name: install JDK
   yum: name=/tmp/{{jdk_download_url|basename}} state=present
