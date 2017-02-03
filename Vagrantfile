@@ -9,17 +9,7 @@ Vagrant.configure("2") do |config|
     ciserver.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "setupci.yml"
       # ansible.verbose = "-v"
-      # ansible.start_at_task = "download responsive starter store"
-    end
-  end
-
-  config.vm.define "devvm", primary: true do |devvm|
-    spsdev.vm.hostname = "devvm"
-    spsdev.vm.network "forwarded_port", guest: 80, host: 10080
-    spsdev.vm.network "forwarded_port", guest: 443, host: 10443
-    spsdev.vm.provision "ansible_local" do |ansible|
-      ansible.playbook = "devvm.yml"
-      # ansible.verbose = "-vvv"
+      # ansible.start_at_task = "create intershop user"
     end
   end
 

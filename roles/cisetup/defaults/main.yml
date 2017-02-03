@@ -75,14 +75,7 @@ ish_svn_ignore_txt: |
   target
 
 ish_gitattributes: |
-  * text eol=lf
-
-  *.png binary
-  *.jpg binary
-  *.jar binary
-  *.woff binary
-  *.ttf binary
-  *.pdf binary
+  * text=auto
 
 gcipublishdefault: |
   before_script:
@@ -144,7 +137,7 @@ ish_initialVersion: 1.0.0
 # create repositories
 ish_repos:
   - { src: '{{ish_home}}/{{ish_bootstrap_directory}}', svnrepo: '{{ish_svn_baseurl}}/devops/{{ish_bootstrap_directory}}', gitrepo: '{{ish_bootstrap_directory}}', gitlabci: '', gitignore: '{{ish_gitignore}}' }
-  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', svnrepo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}', gitrepo: 'demo-deployments', gitlabci: '', gitignore: '{{ish_gitignore}}'  }
+  - { src: '{{ish_setupDirectory}}/devops/deployments/{{ish_projectName}}', svnrepo: '{{ish_svn_baseurl}}/devops/deployments/{{ish_projectName}}', gitrepo: 'sample-deployments', gitlabci: '', gitignore: '{{ish_gitignore}}'  }
   - { src: '{{ish_setupDirectory}}/projects/{{ish_projectName}}', svnrepo: '{{ish_svn_baseurl}}/projects/{{ish_projectName}}', gitrepo: '{{ish_projectName}}', gitlabci: '{{gciproject}}', gitignore: '{{ish_gitignore_prj}}' }
   - { src: '{{ish_setupDirectory}}/devops/ci_server/host_configs', svnrepo: '{{ish_svn_baseurl}}/devops/ci_server/host_configs', gitrepo: '{{ish_hostconfig_repo}}', gitlabci: '{{gcionlycheckout}}', gitignore: '{{ish_gitignore}}' }
   - { src: '{{ish_setupDirectory}}/projects/oracleDriver/3rd_oracle', svnrepo: '{{ish_svn_baseurl}}/projects/oracleDriver/3rd_oracle', gitrepo: 'oracle-driver', gitlabci: '{{gcipublishoracle}}', gitignore: '{{ish_gitignore_orcl}}' }

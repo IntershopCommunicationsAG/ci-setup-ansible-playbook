@@ -1,3 +1,0 @@
----
-- name: install Gnome Desktop
-  yum: name="@GNOME" state=present
