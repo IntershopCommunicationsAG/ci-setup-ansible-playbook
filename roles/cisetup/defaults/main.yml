@@ -29,7 +29,7 @@ ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intersh
 ish_intershop_cisetup_template: https://github.com/IntershopCommunicationsAG/intershop-cisetup-template
 
 # Url to starterstore
-ish_starterstore: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/3.0.3/zips/a_responsive-zip-src-3.0.3.zip"
+ish_starterstore: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/3.0.4/zips/a_responsive-zip-src-3.0.4.zip"
 
 # Directory where to expand the bootstrap (relative to ish_home)
 ish_bootstrap_directory: "{{ish_intershop_cisetup_template | basename}}"
