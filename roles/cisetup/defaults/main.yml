@@ -29,7 +29,7 @@ ish_bootstrap_archive_url: "{{ish_repoBaseURL}}/repositories/ishrepo/com/intersh
 ish_intershop_cisetup_template: https://github.com/IntershopCommunicationsAG/intershop-cisetup-template
 
 # Url to starterstore
-ish_starterstore: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/3.0.0/zips/a_responsive-zip-src-3.0.0.zip"
+ish_starterstore: "{{ish_repoBaseURL}}/repositories/ishrepo/com.intershop.public.source/a_responsive/3.0.4/zips/a_responsive-zip-src-3.0.4.zip"
 
 # Directory where to expand the bootstrap (relative to ish_home)
 ish_bootstrap_directory: "{{ish_intershop_cisetup_template | basename}}"
@@ -153,7 +153,7 @@ ish_content_changes:
   - {dest: "build.gradle", regexp: ".*if\\(name == 'inspired-b2c'.*(\\s.*){4}\\}\\s", replace: ""}
   - {dest: "build.gradle", regexp: "(.*if\\(name == ').*(')", replace: "\\g<1>assembly_{{ish_projectName}}\\g<2>"}
   - {dest: "build.gradle", regexp: "(.*initialVersion.*').*('.*)", replace: "\\g<1>{{ish_initialVersion}}\\g<2>"}
-  - {dest: "gradle.properties", regexp: "(version.com.intershop.assembly.commerce_management_b2c = 7.8.0.0)", replace: "//\\g<1>"}
+  - {dest: "gradle.properties", regexp: "(version.com.intershop.assembly.commerce_management_b2c = 7\\.8\\.\\d+\\.\\d+)", replace: "//\\g<1>"}
   - {dest: "assembly_{{ish_projectName}}/build.gradle", regexp: "(.*)github.com/paladox/phantomjs/releases/download/2.1.7(.*)", replace: "\\g<1>bitbucket.org/ariya/phantomjs/downloads\\g<2>"}
 
 ish_hostconfig_changes:
